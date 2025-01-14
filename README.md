@@ -2,7 +2,7 @@
 
 [My Notes](notes.md)
 
-I am making a virtual chat room where you create a simple small character and can walk around and talk to others in the room. There will be things you can interract with that others will be able to see.
+I am making a virtual chat room where you create a simple small character and can walk around and talk to others in the room. There will be objects you can interract with that others will be able to see. Thinking something like a post it board and buying others drinks. 
 
 
 > [!NOTE]
@@ -18,21 +18,27 @@ I am making a virtual chat room where you create a simple small character and ca
 
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
-- [ ] Proper use of Markdown
-- [ ] A concise and compelling elevator pitch
-- [ ] Description of key features
-- [ ] Description of how you will use each technology
-- [ ] One or more rough sketches of your application. Images must be embedded in this file using Markdown image references.
+- [x] Proper use of Markdown
+- [x] A concise and compelling elevator pitch
+- [x] Description of key features
+- [x] Description of how you will use each technology
+- [x] One or more rough sketches of your application. Images must be embedded in this file using Markdown image references.
 
 ### Elevator pitch
 
-Welcome to Room! Have you ever had a long day and just wanted to sit and unwind with friends but the thought of being in public sounds misreable? With Room you can do just that without leaving the comfort of your home. In Room you can emote and chat with friends in a interactive environment-all from the comfort of your home. 
+Welcome to Room! Have you ever had a long day and just wanted to sit and unwind with friends but the thought of being in public sounds misreable? With Room you can do just that without leaving the comfort of your home. In Room you can emote and chat with friends in a interactive environment playful environment. 
 
 ### Design
 
-![Design image](placeholder.png)
+![Design image](mockup.png)
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+Top Bar: User profile, virtual currency balance, and settings menu.
+
+Main Area: Interactive café layout with movable avatars.
+
+Chat Window: Display chat history with real-time bubbles above avatars.
+
+Menu: A floating menu for purchasing virtual items.
 
 ```mermaid
 sequenceDiagram
@@ -43,20 +49,21 @@ sequenceDiagram
 
 ### Key features
 
-- Describe your key feature
-- Describe your key feature
-- Describe your key feature
+- Customizable Characters: Design your own avatar
+- Interactive Space: walk around and interact with objects
+- Real time chat: Talk to other users in real time via text chat bubbles.
+- Expressive Emotes: Use a range of emotes like waving, and dancing.
 
 ### Technologies
 
 I am going to use the required technologies in the following ways.
 
-- **HTML** - Description here
-- **CSS** - Description here
-- **React** - Description here
-- **Service** - Description here
-- **DB/Login** - Description here
-- **WebSocket** - Description here
+- **HTML** - Structure the hub layout with sections for seating areas, bar counters, and customizable avatars.
+- **CSS** - Create a nice, chill aesthetic with quality colors, smooth animations, and responsive design for screen sizes.
+- **React** - Build a dynamic single-page application with reusable components like the avatar editor, menu, and chat window. Ill also use React Router to manage navigation between spaces.
+- **Service** - Call external APIs for random trivia questions or weather-based Room themes using the OpenWeather API
+- **DB/Login** - Store user profiles, items, and chat logs in DB. Track virtual currency balances for purchasing items.
+- **WebSocket** - Enable real-time messaging for chats and emote triggers. Broadcast special announcements like event updates or limited-time specials.
 
 ## 🚀 AWS deliverable
 
