@@ -15,3 +15,4 @@ Testing and adding new note...
 
 ## HTML Notes
 
+Took IS 201 so some of this is review but I forgot how to add videos and some other things
