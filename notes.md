@@ -20,3 +20,4 @@ Testing and adding new note...
 - I was confused about how simon is deployed but we are deploying the base simon to our app and then we are deploying our start up too
 - was confused because the default on my site was taking back to the 260 simon
 - the simon html has been really helpful
+- I can put shapes to show what the room may look like, looked up shape formatting for the room.

@@ -75,7 +75,7 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
-- [ ] **HTML pages** - I did not complete this part of the deliverable.
+- [x] **HTML pages** - Made an html page for the home and login page that is serving as my index.html. I also made an html page for the room/hub that the user will hang out and interract with. 
 - [ ] **Proper HTML element usage** - I did not complete this part of the deliverable.
 - [ ] **Links** - I did not complete this part of the deliverable.
 - [ ] **Text** - I did not complete this part of the deliverable.
