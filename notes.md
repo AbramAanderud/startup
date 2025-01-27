@@ -19,3 +19,4 @@ Testing and adding new note...
 - you can use the live server to see the changes as you do them
 - I was confused about how simon is deployed but we are deploying the base simon to our app and then we are deploying our start up too
 - was confused because the default on my site was taking back to the 260 simon
+- the simon html has been really helpful

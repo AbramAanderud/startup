@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room - Room Hub</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Hub Page -->
+    <div id="hub-page">
+        <!-- Top Bar -->
+        <div id="top-bar">
+            <div id="user-profile">
+                <span>Username: <span id="user-name-display">Guest</span></span>
+            </div>
+            <div id="gold-count">
+                Gold: <span id="gold-amount">0</span>
+            </div>
+            <div id="settings-menu">
+                <button>Settings</button>
+            </div>
+        </div>
+
+        <div id="chat-box">
+            <div id="chat-messages">
+
+            </div>
+            <form id="chat-form">
+                <input type="text" id="chat-input" placeholder="Type a message...">
+                <button type="submit">Send</button>
+            </form>
+        </div>
+
+        <div id="main-area">
+            <div class="interactive-object" id="post-it-board">Post-it Board</div>
+            <div class="interactive-object" id="buy-drinks">Buy Drinks</div>
+
+            
+            <div class="avatar" id="user-avatar">🙂</div>
+            <div class="avatar" id="other-avatar-1">🙃</div>
+            <div class="avatar" id="other-avatar-2">😎</div>
+        </div>
+    </div>
+
+    <script src="scripts.js"></script>
+    <footer>
+      <hr />
+      <span class="text-reset">Abram Aanderud
+      <br />
+      <a href="https://github.com/AbramAanderud/startup">GitHub</a>
+    </footer>
+</body>
+</html>
