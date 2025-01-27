@@ -76,7 +76,7 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
 - [x] **HTML pages** - Made an html page for the home and login page that is serving as my index.html. I also made an html page for the room/hub that the user will hang out and interract with. 
-- [x] **Proper HTML element usage** - Used headers, div and nav to seperate elements and make things neat
+- [x] **Proper HTML element usage** - Used headers, footers, main, div and nav to seperate elements and display information.
 - [x] **Links** - Linked my github and there is easy page navigation through links
 - [x] **Text** - added text place holders explaining what everything will be and where I will put it. 
 - [x] **3rd party API placeholder** - I am going to use a weather api to change the way the room looks. 
