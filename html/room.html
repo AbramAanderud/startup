@@ -8,55 +8,45 @@
 </head>
 <body>
   <header>
+    <h1>In Chat Room</h1>
 
     <!-- Navigation elements -->
     <nav>
-      <!-- Menu is a semantic alternative to <ul> that represents an interaction -->
       <menu>
         <li><a href="index.html">Back to Home</a></li>
       </menu>
     </nav>
 
-    <!-- Since we don't have the ability to style we use old style HTML to give some visual formatting -->
     <hr />
   </header>
     <!-- Hub Page -->
     <div id="hub-page">
         <!-- Top Bar -->
-        <div id="top-bar">
-            <div id="user-profile">
-                <span>Username: <span id="user-name-display">Guest</span></span>
-            </div>
-            <div id="gold-count">
-                Gold: <span id="gold-amount">0</span>
-            </div>
-            <div id="settings-menu">
-                <button>Settings</button>
-            </div>
-        </div>
+        <div id="hub-page">
+          <!-- Top Bar -->
+          <div id="top-bar">
+              <div id="user-profile">
+                  Username: <span id="user-name-display">guest for now</span>
+              </div>
+          </div>
+  
+          <div id="chat-box" style="position: absolute; bottom: 20px; left: 20px; width: 300px; height: 400px; background-color: #f9f9f9; border: 1px solid #ccc; padding: 10px;">
+              <div id="chat-messages" style="height: 85%; overflow-y: auto; margin-bottom: 10px;">
+              </div>
+              <form id="chat-form">
+                  <input type="text" id="chat-input" placeholder="type">
+                  <button type="submit">Chat</button>
+              </form>
+          </div>
 
-        <div id="chat-box">
-            <div id="chat-messages">
+          <div id="gold-count" style="position: absolute; top: 20px; right: 20px; background-color: #fff; border: 1px solid #ccc; padding: 10px;">
+              Gold Count: <span id="gold-amount">0</span>
+          </div>
 
-            </div>
-            <form id="chat-form">
-                <input type="text" id="chat-input" placeholder="Type a message...">
-                <button type="submit">Send</button>
-            </form>
-        </div>
+          <div id="main-area" style="width: 100%; height: calc(100vh - 50px); background-color: #eaeaea; display: flex; align-items: center; justify-content: center;"> </div>
+      </div>
 
-        <div id="main-area">
-            <div class="interactive-object" id="post-it-board">Post-it Board</div>
-            <div class="interactive-object" id="buy-drinks">Buy Drinks</div>
-
-            
-            <div class="avatar" id="user-avatar">🙂</div>
-            <div class="avatar" id="other-avatar-1">🙃</div>
-            <div class="avatar" id="other-avatar-2">😎</div>
-        </div>
-    </div>
-
-    <script src="scripts.js"></script>
+  
     <footer>
       <hr />
       <span class="text-reset">Abram Aanderud
