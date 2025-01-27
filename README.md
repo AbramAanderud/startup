@@ -76,14 +76,14 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
 - [x] **HTML pages** - Made an html page for the home and login page that is serving as my index.html. I also made an html page for the room/hub that the user will hang out and interract with. 
-- [ ] **Proper HTML element usage** - I did not complete this part of the deliverable.
-- [ ] **Links** - I did not complete this part of the deliverable.
-- [ ] **Text** - I did not complete this part of the deliverable.
-- [ ] **3rd party API placeholder** - I did not complete this part of the deliverable.
-- [ ] **Images** - I did not complete this part of the deliverable.
-- [ ] **Login placeholder** - I did not complete this part of the deliverable.
-- [ ] **DB data placeholder** - I did not complete this part of the deliverable.
-- [ ] **WebSocket placeholder** - I did not complete this part of the deliverable.
+- [x] **Proper HTML element usage** - Used headers, div and nav to seperate elements and make things neat
+- [x] **Links** - Linked my github and there is easy page navigation through links
+- [x] **Text** - added text place holders explaining what everything will be and where I will put it. 
+- [x] **3rd party API placeholder** - I am going to use a weather api to change the way the room looks. 
+- [x] **Images** - Image in there as a placeholder for the character design, ill add images as decorations to the room later.
+- [x] **Login placeholder** - Added.
+- [x] **DB data placeholder** - This will be seen with the gold counter and leaderboard as well as the current log of chats that is being stored.
+- [x] **WebSocket placeholder** - The chat box will be in real time and with everyone in the room.
 
 ## 🚀 CSS deliverable
 
