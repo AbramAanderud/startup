@@ -22,3 +22,4 @@ Testing and adding new note...
 - the simon html has been really helpful
 - I can put shapes to show what the room may look like, looked up shape formatting for the room.
 - I think I am now going to make the room weather reactive.
+- Learned that you can pull fonts off the internet with css as long as you have the url
