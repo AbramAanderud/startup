@@ -1,8 +1,60 @@
-/* General Styles */
+
 body {
     font-family: 'Arial', sans-serif;
     margin: 0;
     padding: 0;
     background-color: #1a1a1a;
     color: #ffffff;
+}
+
+#settings-button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    background: url('../images/stone.jpeg') no-repeat center center;
+    background-size: cover;
+    border: 3px solid #777;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 0 10px #444;
+}
+
+#settings-button img {
+    width: 24px;
+    height: 24px;
+    filter: invert(100%);
+}
+
+#settings-button:hover {
+    background-color: #555;
+}
+
+#gold-leaderboard {
+    text-align: center;
+    background-color: #333;
+    padding: 10px;
+    margin: 20px auto;
+    width: 300px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #ffd700;
+}
+
+#gold-leaderboard h3 {
+    margin: 0;
+    color: #ffd700;
+}
+
+#gold-leaderboard ul {
+    list-style: none;
+    padding: 0;
+}
+
+#gold-leaderboard li {
+    padding: 5px;
+    color: #fff;
 }
