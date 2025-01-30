@@ -3,8 +3,8 @@ body {
     font-family: 'Arial', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
-    color: #333;
+    background-color: #000000;
+    color: #ffffff;
 }
 
 @keyframes gradientText {
@@ -42,6 +42,12 @@ body {
 .wavy-text span:nth-child(6) { animation-delay: 0.5s; }
 .wavy-text span:nth-child(7) { animation-delay: 0.6s; }
 
+@keyframes flicker {
+    0% { opacity: 0.1; text-shadow: 0 0 5px #ff7300, 0 0 10px #ff7300, 0 0 15px #ff7300; }
+    50% { opacity: 1; text-shadow: 0 0 10px #ffeb00, 0 0 20px #ffeb00, 0 0 30px #ffeb00; }
+    100% { opacity: 0.1; text-shadow: 0 0 5px #ff7300, 0 0 10px #ff7300, 0 0 15px #ff7300; }
+}
+
 
 @font-face {
     font-family: 'PezFont';
@@ -57,20 +63,66 @@ body {
     font-style: normal;
 }
 
+@font-face {
+    font-family: 'western';
+    src: url('../fonts/WesterngamesOutlineRegular-2yDv.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'arcade';
+    src: url('../fonts/E4DigitalArcadeV2Regular-wZOw.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'evil';
+    src: url('../fonts/Dangernight-vnZ5y.otf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'cyber';
+    src: url('../fonts/CyberformLaser-8Oa3B.otf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'ninja';
+    src: url('../fonts/NinjaGarden-ov1BB.otf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+h2 {
+    font-family: 'western', sans-serif !important;
+    font-weight: normal;
+    font-size: 60px;
+    font-synthesis: inherit;
+    color: #fffb00;
+    text-shadow: 0 0 10px #ff7300, 0 0 20px #ff7300, 0 0 30px #ff7300;
+    animation: flicker 1s infinite alternate;
+}
+
 
 h1 {
     font-family: 'PezFont', sans-serif !important;
     font-weight: normal;
-    font-size: 120px;
+    font-size: 150px;
     font-synthesis: inherit;
-}
-
-h2 {
-    font-family: 'PezFont', sans-serif !important;
-    font-weight: normal;
-    font-size: 40px;
-    font-synthesis: inherit;
-    color: #0056b3;
+    background: linear-gradient(45deg, #ff0000, #ff7300, #ffeb00, #47ff00, #00ffee, #0040ff, #8000ff);
+    background-size: 400% 400%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientText 5s ease infinite;
+    margin-bottom: 10px; 
+    padding-bottom: 10; 
+    line-height: 100%;
+    margin-top: 10px;
 }
 
 
@@ -83,27 +135,38 @@ main {
     text-align: center;
 }
 
+
 form {
-    background: rgb(255, 255, 255);
+    background: #555;
     padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 15px rgba(218, 192, 192, 0.1);
-    border: 1px solid #671b1b;
-    width: 300px;
+    border-radius: 0px; /* Removes rounded corners */
+    box-shadow: inset 0 0 10px #333, 0 0 20px #111;
+    border: 6px solid #777;
+    width: 320px;
+    color: white;
+    font-family: 'Arial', sans-serif;
+    text-transform: uppercase;
+    font-weight: bold;
+    text-align: center;
+    background-image: url('../images/stone.jpeg');
+    background-size: cover;
+    background-blend-mode: multiply;
+    transform: scale(1.05); 
+    outline: 4px solid #222; 
 }
 
 input {
     width: 90%;
     padding: 10px;
     margin: 5px 0;
-    border: 1px solid #ccc;
+    border: 1px solid #000000;
     border-radius: 5px;
     font-size: 16px;
 }
 
 button {
     padding: 10px 15px;
-    background-color: #000000;
+    background-color: #222;
     color: white;
     border: none;
     cursor: pointer;
@@ -112,14 +175,23 @@ button {
     font-weight: bold;
     width: 100%;
     margin-top: 10px;
+    box-shadow: 0 4px #111;
 }
 
+
 button:hover {
-    background-color: #0056b3;
+    background-color: #3064ff;
 }
+
 
 h5 {
     font-size: 14px;
-    color: #666;
-    margin-top: 15px;
+    color: #ffffff;
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    background-color: transparent;
+    border-top: none; 
 }
