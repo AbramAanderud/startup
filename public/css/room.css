@@ -1,21 +1,35 @@
-
+/* General Styles */
 body {
     font-family: 'Arial', sans-serif;
     margin: 0;
     padding: 0;
     background-color: #1a1a1a;
     color: #ffffff;
+    overflow: hidden; /* Prevents scrolling */
+}
+
+/* Main Room Fullscreen Layout */
+#main-area {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #eaeaea;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
 }
 
 #settings-button {
     position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 40px;
-    height: 40px;
+    top: 10px;
+    right: 10px;
+    width: 60px;
+    height: 60px;
+    background: url('../images/gear-tin.png') no-repeat center center;
     background-size: cover;
-    border: 3px solid #777;
-    border-radius: 5px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -33,27 +47,107 @@ body {
     background-color: #555;
 }
 
-#gold-leaderboard {
+#settings-panel {
+    display: none;
+    position: absolute;
+    top: 60px;
+    right: 20px;
+    width: 300px;
+    background: #222;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #444;
+    z-index: 1000;
+}
+
+#gold-leaderboard-container {
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
     text-align: center;
+    width: 300px;
+}
+
+#gold-leaderboard-button {
+    background-color: #444;
+    color: #ffd700;
+    padding: 10px;
+    border: 2px solid #777;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 15px;
+    width: 300px;
+    text-align: center;
+    box-shadow: 0 0 5px #ffd700;
+}
+
+#gold-leaderboard {
+    display: none;
     background-color: #333;
     padding: 10px;
-    margin: 20px auto;
-    width: 300px;
     border-radius: 10px;
     box-shadow: 0 0 10px #ffd700;
+    margin-top: 5px;
+    position: absolute;
+    top: 50px;
+    position: fixed;
+    width: 200px;
 }
 
-#gold-leaderboard h3 {
-    margin: 0;
-    color: #ffd700;
+/* Chat Box (Bottom Right) */
+#chat-box {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 300px;
+    height: 400px;
+    background-color: #222;
+    border: 1px solid #444;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #000;
 }
 
-#gold-leaderboard ul {
-    list-style: none;
-    padding: 0;
+#chat-messages {
+    height: 85%;
+    overflow-y: auto;
+    margin-bottom: 10px;
+    background-color: #333;
+    padding: 10px;
+    border-radius: 5px;
 }
 
-#gold-leaderboard li {
-    padding: 5px;
+#chat-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #444;
+    border-radius: 5px;
+    background-color: #555;
     color: #fff;
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    background-color: #ffcc00;
+    color: #000;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #ff9900;
+}
+
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 10px;
+    background-color: #222;
+    border-top: 3px solid #444;
 }
