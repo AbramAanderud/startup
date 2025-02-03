@@ -1,26 +1,25 @@
-/* General Setup */
 body {
     margin: 0;
     padding: 0;
-    background-color: black; /* Keeps background black */
+    background-color: black; 
     color: white;
     font-family: Arial, sans-serif;
     overflow: hidden;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     height: 100vh;
 }
 
-/* Room Container - Slightly Bigger Now */
 #room-container {
-    width: 730px; /* Increased from 600px */
-    height: 700px; /* Increased from 600px */
+    width: 730px; 
+    height: 700px;
     background-color: black;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 3px solid white; /* Outline for visibility */
+    border: 3px solid white; 
     box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
 }
 
@@ -29,11 +28,10 @@ body {
     height: 100%;
     position: relative;
     background-image: url('../images/best-carpet.jpeg'); 
-    background-size: 100px 100px; /* Size of each tile */
-    background-repeat: repeat; /* Makes it a repeating pattern */
+    background-size: 100px 100px; 
+    background-repeat: repeat; 
 } 
 
-/* Gold Count (Top Center) */
 #gold-count {
     position: fixed;
     top: 10px;
@@ -49,7 +47,6 @@ body {
     z-index: 20;
 }
 
-/* Settings Button (Top Right) */
 #settings-button {
     position: fixed;
     top: 10px;
@@ -70,14 +67,13 @@ body {
     left: 0;
     width: 100%;
     height: 20%;
-    background-image: url('../images/redbrick.avif'); /* Small brick texture */
-    background-size: 300px 200px; /* Makes each brick small */
-    background-repeat: repeat; /* Repeats across the whole wall */
-    background-position: top left; /* Ensures alignment */
+    background-image: url('../images/redbrick.avif');
+    background-size: 300px 200px; 
+    background-repeat: repeat; 
+    background-position: top left; 
     z-index: 5;
 }
 
-/* Bar */
 #bar {
     position: absolute;
     top: 15%;
@@ -91,28 +87,27 @@ body {
     z-index: 3;
 }
 
-/* Tables */
 .table {
     position: absolute;
-    width: 90px; /* Slightly increased */
+    width: 90px;
     height: 90px;
     background-color: rgb(157, 76, 0);
     border-radius: 50%;
     transform: perspective(500px) rotateX(30deg);
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5);
+    z-index: 10; 
 }
 
-/* Chairs */
 .chair {
     position: absolute;
-    width: 35px; /* Slightly increased */
+    width: 35px;
     height: 35px;
-    background-color: darkgray;
+    background-color: rgb(255, 158, 158);
     border-radius: 50%;
     transform: perspective(500px) rotateX(30deg);
+    z-index: 10;
 }
 
-/* Vending Machine */
 .vending-machine {
     position: absolute;
     top: 15%;
@@ -125,19 +120,18 @@ body {
     z-index: 3;
 }
 
-/* Chat Box (Bottom Right, Outside the Container) */
 #chat-box {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    width: 200px; /* Slightly larger */
+    width: 200px; 
     height: 260px;
     background-color: #222;
     border: 1px solid #444;
     padding: 10px;
     border-radius: 10px;
     box-shadow: 0 0 10px #000;
-    z-index: 15; /* Ensure it's above room */
+    z-index: 15; 
 }
 
 #chat-messages {
@@ -172,3 +166,31 @@ button {
 button:hover {
     background-color: #ff9900;
 }
+
+#footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 10px;
+    font-size: 14px;
+    z-index: 5;
+}
+
+#table-1 { top: 50%; left: 10%; }
+#table-2 { top: 50%; left: 30%; }
+#table-3 { top: 50%; left: 50%; }
+#table-4 { top: 50%; left: 50%; }
+
+#chair-1 { top: 53%; left: 27%; }
+#chair-2 { top: 53%; left: 33%; }
+#chair-3 { top: 53%; left: 57%; }
+#chair-4 { top: 53%; left: 63%; }
+
+#chair-5 { top: 57%; left: 27%; }
+#chair-6 { top: 57%; left: 33%; }
+#chair-7 { top: 57%; left: 57%; }
+#chair-8 { top: 57%; left: 63%; }
+
