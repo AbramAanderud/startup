@@ -26,3 +26,4 @@ Testing and adding new note...
 - Using flex and some other built in styling on css you can make your website fit anything but it is important to make sure you arent flexing wrong
 - You can debug css by inspecting the thing that is wrong in the browser to have a better idea of the issue
 - You can use bootstraps to basically speed run making a website
+- There is a z axis
