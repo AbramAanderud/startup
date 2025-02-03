@@ -3,74 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Room - Room Hub</title>
+    <title>Chat Room</title>
     <link rel="stylesheet" href="css/room.css">
-
 </head>
 <body>
-  <header>
 
-    <nav>
-      <menu>
-        <li><a href="index.html">Back to Home</a></li>
-      </menu>
-    </nav>
+    <!-- Gold Count at the Very Top -->
+    <div id="gold-count">Gold: 100</div>
 
-    <div id="room">
-        
-      <!-- Settings Button -->
-      <div id="settings-button">
-       
-      </div>
+    <!-- Settings Button (Top Right) -->
+    <div id="settings-button"></div>
 
-      <!-- Gold Leaderboard Dropdown -->
-      <div id="gold-leaderboard-container">
-          <button id="gold-leaderboard-button">Click to See Gold Leaderboard</button>
-          <div id="gold-leaderboard">
-              <h3>Gold Leaderboard</h3>
-              <ul>
-                  <li>User1: 100 Gold</li>
-                  <li>User2: 200 Gold</li>
-              </ul>
-          </div>
-      </div>
+    <!-- Room Container (Centers the room in the middle of the screen) -->
+    <div id="room-container">
+        <div id="room">
 
-      <!-- Room Objects -->
-      <div class="object table" id="table-1">Table 1</div>
-      <div class="object table" id="table-2">Table 2</div>
-      <div class="object chair" id="chair-1">Chair</div>
-      <div class="object chair" id="chair-2">Chair</div>
-      <div class="object vending-machine" id="vending-machine">Buy Drinks</div>
+            <!-- Back Wall -->
+            <div id="wall-back"></div>
 
-      <!-- Avatar (Player) -->
-      <div id="player"></div>
+            <!-- Bar -->
+            <div id="bar">Bar</div>
 
-      <!-- Chat Box -->
-      <div id="chat-box">
-          <div id="chat-messages"></div>
-          <form id="chat-form">
-              <input type="text" id="chat-input" placeholder="Type a message...">
-              <button type="submit">Chat</button>
-          </form>
-      </div>
+            <!-- Tables and Chairs -->
+            <div class="table" id="table-1"></div>
+            <div class="chair" id="chair-1"></div>
+            <div class="chair" id="chair-2"></div>
+            <div class="chair" id="chair-3"></div>
+            <div class="chair" id="chair-4"></div>
 
-  </div>
+            <div class="table" id="table-2"></div>
+            <div class="chair" id="chair-5"></div>
+            <div class="chair" id="chair-6"></div>
+            <div class="chair" id="chair-7"></div>
+            <div class="chair" id="chair-8"></div>
 
+            <!-- Vending Machine -->
+            <div class="vending-machine" id="vending-machine">Buy Drinks</div>
 
+            <!-- Player (Avatar) -->
+            <div id="player"></div>
 
+        </div>
+    </div>
 
+    <!-- Chat Box (Now outside the container at the bottom right) -->
+    <div id="chat-box">
+        <div id="chat-messages"></div>
+        <form id="chat-form">
+            <input type="text" id="chat-input" placeholder="Type a message...">
+            <button type="submit">Chat</button>
+        </form>
+    </div>
 
-    <hr />
-  </header>
-
-  
-    
-
-  
     <footer>
       <hr />
-      <span class="text-reset">Abram Aanderud </span>
-      <br />
+      <span class="text-reset">Abram Aanderud website github link: </span>
       <a href="https://github.com/AbramAanderud/startup">GitHub</a>
     </footer>
 

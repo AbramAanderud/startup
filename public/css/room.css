@@ -1,126 +1,156 @@
-/* General Styles */
+/* General Setup */
 body {
-    font-family: 'Arial', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #1a1a1a;
-    color: #ffffff;
-    overflow: hidden; /* Prevents scrolling */
-}
-
-/* Main Room Fullscreen Layout */
-#main-area {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: #eaeaea;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    background-color: black; /* Keeps background black */
+    color: white;
+    font-family: Arial, sans-serif;
     overflow: hidden;
-}
-
-#settings-button {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 60px;
-    height: 60px;
-    background: url('../images/gear-tin.png') no-repeat center center;
-    background-size: cover;
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 0 10px #444;
+    height: 100vh;
 }
 
-#settings-button img {
-    width: 24px;
-    height: 24px;
-    filter: invert(100%);
+/* Room Container - Slightly Bigger Now */
+#room-container {
+    width: 730px; /* Increased from 600px */
+    height: 700px; /* Increased from 600px */
+    background-color: black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid white; /* Outline for visibility */
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
 }
 
-#settings-button:hover {
-    background-color: #555;
-}
+#room {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background-image: url('../images/best-carpet.jpeg'); 
+    background-size: 100px 100px; /* Size of each tile */
+    background-repeat: repeat; /* Makes it a repeating pattern */
+} 
 
-#settings-panel {
-    display: none;
-    position: absolute;
-    top: 60px;
-    right: 20px;
-    width: 300px;
-    background: #222;
-    padding: 15px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px #444;
-    z-index: 1000;
-}
-
-#gold-leaderboard-container {
-    position: absolute;
-    top: 10%;
+/* Gold Count (Top Center) */
+#gold-count {
+    position: fixed;
+    top: 10px;
     left: 50%;
     transform: translateX(-50%);
-    text-align: center;
-    width: 300px;
-}
-
-#gold-leaderboard-button {
-    background-color: #444;
-    color: #ffd700;
-    padding: 10px;
-    border: 2px solid #777;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 15px;
-    width: 300px;
-    text-align: center;
-    box-shadow: 0 0 5px #ffd700;
-}
-
-#gold-leaderboard {
-    display: none;
-    background-color: #333;
-    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 10px 20px;
     border-radius: 10px;
-    box-shadow: 0 0 10px #ffd700;
-    margin-top: 5px;
-    position: absolute;
-    top: 50px;
-    position: fixed;
-    width: 200px;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+    color: #ffd700;
+    font-size: 20px;
+    font-weight: bold;
+    z-index: 20;
 }
 
-/* Chat Box (Bottom Right) */
-#chat-box {
+/* Settings Button (Top Right) */
+#settings-button {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    width: 50px;
+    height: 50px;
+    background: url('../images/gear-tin.png') no-repeat center center;
+    background-size: contain;
+    cursor: pointer;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    z-index: 20;
+}
+
+#wall-back {
     position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 20%;
+    background-image: url('../images/redbrick.avif'); /* Small brick texture */
+    background-size: 300px 200px; /* Makes each brick small */
+    background-repeat: repeat; /* Repeats across the whole wall */
+    background-position: top left; /* Ensures alignment */
+    z-index: 5;
+}
+
+/* Bar */
+#bar {
+    position: absolute;
+    top: 15%;
+    left: 50%;
+    width: 50%;
+    height: 10%;
+    background-color: brown;
+    transform: translateX(-50%) perspective(500px) rotateX(30deg);
+    border-radius: 10px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5);
+    z-index: 3;
+}
+
+/* Tables */
+.table {
+    position: absolute;
+    width: 90px; /* Slightly increased */
+    height: 90px;
+    background-color: rgb(157, 76, 0);
+    border-radius: 50%;
+    transform: perspective(500px) rotateX(30deg);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Chairs */
+.chair {
+    position: absolute;
+    width: 35px; /* Slightly increased */
+    height: 35px;
+    background-color: darkgray;
+    border-radius: 50%;
+    transform: perspective(500px) rotateX(30deg);
+}
+
+/* Vending Machine */
+.vending-machine {
+    position: absolute;
+    top: 15%;
+    left: 10%;
+    width: 120px;
+    height: 160px;
+    background-color: #333;
+    border-radius: 10px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5);
+    z-index: 3;
+}
+
+/* Chat Box (Bottom Right, Outside the Container) */
+#chat-box {
+    position: fixed;
     bottom: 20px;
     right: 20px;
-    width: 300px;
-    height: 400px;
+    width: 200px; /* Slightly larger */
+    height: 260px;
     background-color: #222;
     border: 1px solid #444;
     padding: 10px;
     border-radius: 10px;
     box-shadow: 0 0 10px #000;
+    z-index: 15; /* Ensure it's above room */
 }
 
 #chat-messages {
-    height: 85%;
+    height: 80%;
     overflow-y: auto;
-    margin-bottom: 10px;
     background-color: #333;
-    padding: 10px;
+    padding: 5px;
     border-radius: 5px;
 }
 
 #chat-input {
-    width: 100%;
-    padding: 10px;
+    width: 90%;
+    padding: 8px;
     border: 1px solid #444;
     border-radius: 5px;
     background-color: #555;
@@ -129,25 +159,16 @@ body {
 
 button {
     width: 100%;
-    padding: 10px;
+    padding: 8px;
     background-color: #ffcc00;
     color: #000;
     border: none;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: bold;
     border-radius: 5px;
 }
 
 button:hover {
     background-color: #ff9900;
-}
-
-
-/* Footer */
-footer {
-    text-align: center;
-    padding: 10px;
-    background-color: #222;
-    border-top: 3px solid #444;
 }
