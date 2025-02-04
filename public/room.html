@@ -5,31 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat Room</title>
     <link rel="stylesheet" href="css/room.css">
+    <h1>CHATTER PAD</h1>
 </head>
+
 <body>
 
-    <h1>CHATTER PAD</h1>
-    
     <a href="index.html" id="home-button">EXIT</a>
 
     <div id="gold-count">
       <img src="images/final coin.png" alt="Coin" class="gold-icon">
-      <span>: 100</span>
+      <span>: 1,000,000</span>
     </div>
 
     <div id="settings-button"></div>
 
-    <!-- Room Container (Centers the room in the middle of the screen) -->
     <div id="room-container">
         <div id="room">
 
-            <!-- Back Wall -->
             <div id="wall-back"></div>
 
-            <!-- Bar -->
-            <div id="bar">Bar</div>
+            <div id="bar">Bar, will have drinks and a bar tender somehow will open menu on click</div>
 
-            <div id="bar-lower">Bar</div>
+            <div id="bar-lower"></div>
             
             <div class="picture-frame" id="frame-1">
               <img src="images/blob.webp" alt="Picture 1">
@@ -38,46 +35,36 @@
               <img src="images/michalagnelo.jpg" alt="Picture 2">
             </div>
 
-
-            <!-- Tables and Chairs -->
-            <div class="table" id="table-1"></div>
+            <div class="table" id="table-1">0/4</div>
             <div class="chair" id="chair-1"></div>
             <div class="chair" id="chair-2"></div>
             <div class="chair" id="chair-3"></div>
             <div class="chair" id="chair-4"></div>
 
-            <div class="table" id="table-2"></div>
+            <div class="table" id="table-2">0/4</div>
             <div class="chair" id="chair-5"></div>
             <div class="chair" id="chair-6"></div>
             <div class="chair" id="chair-7"></div>
             <div class="chair" id="chair-8"></div>
 
-            <div class="table" id="table-3"></div>
+            <div class="table" id="table-3">0/4</div>
             <div class="chair" id="chair-9"></div>
             <div class="chair" id="chair-10"></div>
             <div class="chair" id="chair-11"></div>
             <div class="chair" id="chair-12"></div>
 
-            <div class="table" id="table-4"></div>
+            <div class="table" id="table-4">0/4</div>
             <div class="chair" id="chair-13"></div>
             <div class="chair" id="chair-14"></div>
             <div class="chair" id="chair-15"></div>
             <div class="chair" id="chair-16"></div>
-
-            <!-- Vending Machine -->
-            <div class="vending-machine" id="vending-machine">Buy Drinks</div>
-
-            <!-- Player (Avatar) -->
-            <div id="player"></div>
-
         </div>
     </div>
 
-    <!-- Chat Box (Now outside the container at the bottom right) -->
     <div id="chat-box">
         <div id="chat-messages"></div>
         <form id="chat-form">
-            <input type="text" id="chat-input" placeholder="Type a message...">
+            <input type="text" id="chat-input" placeholder="Type here">
             <button type="submit">Chat</button>
         </form>
     </div>
