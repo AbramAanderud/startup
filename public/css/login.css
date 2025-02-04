@@ -128,9 +128,11 @@ main {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     height: 100vh;
     text-align: center;
+    padding-top: 0px;
+    min-height: 100vh;
 }
 
 
@@ -145,7 +147,7 @@ form {
     text-transform: uppercase;
     font-weight: bold;
     text-align: center;
-    background-image: url('../images/stone.jpeg');
+    background-image: url('../images/.jpeg');
     background-size: cover;
     background-blend-mode: multiply;
     transform: scale(1.05); 
@@ -187,8 +189,13 @@ h5 {
 }
 
 footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
     text-align: center;
-    padding: 5px;
-    background-color: transparent;
-    border-top: black; 
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 10px;
+    font-size: 14px;
+    z-index: 5;
 }
