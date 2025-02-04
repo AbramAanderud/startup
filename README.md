@@ -89,12 +89,12 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
-- [ ] **Header, footer, and main content body** - I did not complete this part of the deliverable.
-- [ ] **Navigation elements** - I did not complete this part of the deliverable.
-- [ ] **Responsive to window resizing** - I did not complete this part of the deliverable.
-- [ ] **Application elements** - I did not complete this part of the deliverable.
-- [ ] **Application text content** - I did not complete this part of the deliverable.
-- [ ] **Application images** - I did not complete this part of the deliverable.
+- [x] **Header, footer, and main content body** - Put github link in footers, added header of chatter pad, body content is the room and also the login box
+- [x] **Navigation elements** - The EXIT button on the room in the top left and the login button on the index page
+- [x] **Responsive to window resizing** - Made the room window dynamic so it resizes but the inside content is fit so it seems more like a real virtual room. The chat box and buttons stay in the corners as intended. 
+- [x] **Application elements** - Added the room and gold counter will probably add a player list. Added a bad and some tables with little cushion chairs. Might try and design more and add a bar tender. 
+- [x] **Application text content** - Has titles and a gold counter will have a whole thing of settings when it comes down. Will display the user name as well. 
+- [x] **Application images** - Added Photos on the walls of the room and also the floor and wall are repeated photos. Might let users change the pictures not sure if thats a good idea. 
 
 ## 🚀 React part 1: Routing deliverable
 

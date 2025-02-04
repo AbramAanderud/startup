@@ -117,7 +117,7 @@ h1 {
     height: 665px;
     position: absolute;
     background-image: url('../images/best-carpet.jpeg'); 
-    background-size: 100px 100px; 
+    background-size: 50px 50px; 
     background-repeat: repeat; 
 } 
 
@@ -289,6 +289,21 @@ button {
 
 button:hover {
     background-color: #a67122;
+}
+
+#username-display {
+    position: absolute;
+    top: 10px;
+    left: 20px;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    font-family: 'arcade', sans-serif;
+    font-size: 10px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    border: 2px solid white;
+    text-align: center;
+    z-index: 10;
 }
 
 #footer {

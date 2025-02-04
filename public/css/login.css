@@ -120,9 +120,7 @@ h1 {
     -webkit-text-fill-color: transparent;
     animation: gradientText 5s ease infinite;
     margin-bottom: 10px; 
-    padding-bottom: 10; 
     line-height: 100%;
-    margin-top: 10px;
 }
 
 
