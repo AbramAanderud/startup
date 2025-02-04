@@ -89,11 +89,11 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
-- [x] **Header, footer, and main content body** - Put github link in footers, added header of chatter pad, body content is the room and also the login box
-- [x] **Navigation elements** - The EXIT button on the room in the top left and the login button on the index page
-- [x] **Responsive to window resizing** - Made the room window dynamic so it resizes but the inside content is fit so it seems more like a real virtual room. The chat box and buttons stay in the corners as intended. 
-- [x] **Application elements** - Added the room and gold counter will probably add a player list. Added a bad and some tables with little cushion chairs. Might try and design more and add a bar tender. 
-- [x] **Application text content** - Has titles and a gold counter will have a whole thing of settings when it comes down. Will display the user name as well. 
+- [x] **Header, footer, and main content body** - Put github link in footers, added header of chatter pad, body content is the room and also the login box and some text. 
+- [x] **Navigation elements** - The EXIT button on the room in the top left and the login button is on the index page.
+- [x] **Responsive to window resizing** - Made the room window dynamic so it resizes but the inside content is fixed inside the container so it seems more like a real virtual room. The chat box and buttons stay in the corner for easy access. 
+- [x] **Application elements** - Added the room and gold counter will probably add a player list. Added a bar and some tables with little cushion chairs. Might try and design more and add a bar tender. 
+- [x] **Application text content** - Has username in corner of room and a gold counter will have a list of settings that come up when you click on settings later along with a chat box. Hoping to store chat logs. 
 - [x] **Application images** - Added Photos on the walls of the room and also the floor and wall are repeated photos. Might let users change the pictures not sure if thats a good idea. 
 
 ## 🚀 React part 1: Routing deliverable
