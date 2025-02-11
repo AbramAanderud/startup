@@ -27,3 +27,4 @@ Testing and adding new note...
 - You can debug css by inspecting the thing that is wrong in the browser to have a better idea of the issue
 - You can use bootstraps to basically speed run making a website
 - There is a z axis
+-Vite is used to help view your webiste and enable react
