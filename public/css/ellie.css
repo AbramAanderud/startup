@@ -1,0 +1,89 @@
+body {
+    background-color: black;
+    color: pink;
+    text-align: center;
+    font-size: 2em;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    position: relative;
+    overflow: hidden;
+}
+
+@keyframes flicker {
+    0% { opacity: 0.1; text-shadow: 0 0 5px #ff1493, 0 0 10px #ff1493, 0 0 15px #ff1493; }
+    50% { opacity: 1; text-shadow: 0 0 10px #ff69b4, 0 0 20px #ff69b4, 0 0 30px #ff69b4; }
+    100% { opacity: 0.1; text-shadow: 0 0 5px #ff1493, 0 0 10px #ff1493, 0 0 15px #ff1493; }
+}
+
+@font-face {
+    font-family: 'western';
+    src: url('../fonts/WesterngamesOutlineRegular-2yDv.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+h1 {
+    font-family: 'western', sans-serif;
+    font-size: 100px;
+    background: linear-gradient(45deg, #ff0000, #ff7300, #ffeb00, #47ff00, #00ffee, #0040ff, #8000ff);
+    background-size: 400% 400%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: flicker 2s infinite alternate;
+}
+.heart {
+    position: fixed;
+    top: 35%;
+    left: 50%;
+    width: 100px;
+    height: 100px;
+    background-color: pink;
+    transform: translate(-50%, -50%) rotate(-45deg);
+    animation: glow 2s infinite alternate;
+    box-shadow: 0 0 20px #ff1493, 0 0 40px #ff1493, 0 0 60px #ff1493;
+}
+
+.heart::before,
+.heart::after {
+    content: "";
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background-color: pink;
+    border-radius: 50%;
+}
+
+.heart::before {
+    top: -50px;
+    left: 0;
+}
+
+.heart::after {
+    left: 50px;
+    top: 0;
+}
+
+@keyframes glow {
+    0% { box-shadow: 0 0 10px #ff69b4, 0 0 20px #ff69b4, 0 0 30px #ff69b4; }
+    100% { box-shadow: 0 0 20px #ff1493, 0 0 40px #ff1493, 0 0 60px #ff1493; }
+}
+
+
+.container {
+    position: relative;
+    top: 40vh;
+}
+
+button {
+    background-color: pink;
+    font-family:'Times New Roman', Times, serif;
+    font-size: 1.5em;
+    border: none;
+    padding: 10px 20px;
+    margin: 10px;
+    cursor: pointer;
+    border-radius: 10px;
+}
+
+button:hover {
+    background-color: hotpink;
+}
