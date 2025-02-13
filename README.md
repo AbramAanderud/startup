@@ -101,7 +101,7 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
 - [x] **Bundled using Vite** - Added Vite. 
-- [x] **Components** - Everything is using React and formatted like the simom. 
+- [x] **Components** - Everything is using React and formatted like the simom. I want to have custom headers and nav buttons so I accounted for that. 
 - [x] **Router** - My pages are correctly routed. 
 
 ## 🚀 React part 2: Reactivity
