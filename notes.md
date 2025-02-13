@@ -29,3 +29,4 @@ Testing and adding new note...
 - There is a z axis
 - Vite is used to help view your webiste and enable react
 - needed to add a gitignore for some reason didnt have one
+- ubuntu was the issue becasue my index.html was in the wrong folder. 
