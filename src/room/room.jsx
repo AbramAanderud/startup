@@ -1,10 +1,11 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 export function Room() {
   return (
     <main> 
         <h1>CHATTER PAD</h1>
-        <a href="/" id="home-button">EXIT</a>
+        <Link to="/" id="home-button">EXIT</Link>
 
         <div id="gold-count">
           <img src="images/final coin.png" alt="Coin" className="gold-icon" />
