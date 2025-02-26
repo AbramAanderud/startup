@@ -15,6 +15,13 @@ export function Room() {
     localStorage.setItem('chatMessages', JSON.stringify(messages));
   }, [messages]);
 
+  {messages.map((msg) => (
+    <div key={msg.id} className="chat-message">
+      <strong>{msg.sender}:</strong> {msg.text}
+    </div>
+  ))}
+  
+
 
   return (
     <main> 
@@ -70,12 +77,15 @@ export function Room() {
         </div>
 
         <div id="chat-box">
-          <div id="chat-messages">Will be collapsible</div>
+          <div id="chat-messages">
+            {/* messages will be rendered */}
+          </div>
           <form id="chat-form">
             <input type="text" id="chat-input" placeholder="Type here" />
             <button type="submit">Chat</button>
           </form>
         </div>
+
 
     </main>
   );
