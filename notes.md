@@ -30,3 +30,7 @@ Testing and adding new note...
 - Vite is used to help view your webiste and enable react
 - needed to add a gitignore for some reason didnt have one
 - ubuntu was the issue becasue my index.html was in the wrong folder. 
+- You can store things in local storage
+- Can exhange large amounts of data with json
+- Can use promises to not interrupt main thread
+- Using async you can make promises pending because the execution function has no yet resolved
