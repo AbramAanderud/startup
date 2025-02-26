@@ -10,6 +10,10 @@ body {
     /* align-items: center; */
     /* justify-content: center; */
   }
+
+  main {
+    margin-top: 140px; 
+  }
   
   /* Keyframes and font definitions remain unchanged */
   @keyframes gradientText {
@@ -79,6 +83,19 @@ body {
     src: url('../fonts/PezFont-3lr6.ttf') format('truetype');
     font-weight: bold;
     font-style: normal;
+  }
+
+  header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: black; /* or a semi-transparent color if desired */
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 100; /* ensure it's above other content */
   }
   
   /* Responsive heading */
@@ -257,14 +274,14 @@ body {
     transform: perspective(500px) rotateX(30deg);
     z-index: 10;
   }
-  
-  /* Chat box updated to use percentages and flex layout */
   #chat-box {
     position: fixed;
     bottom: 2%;
     right: 2%;
     width: 20%;
+    min-width: 250px; /* Ensures there's always enough horizontal space */
     height: 30%;
+    min-height: 200px; /* Ensures there's always enough vertical space */
     display: flex;
     flex-direction: column;
     background-color: rgba(0, 0, 0, 0.7);
@@ -275,8 +292,8 @@ body {
   }
   
   #chat-messages {
-    flex: 1;
-    overflow-y: auto;
+    flex: 1;           /* Occupies remaining vertical space */
+    overflow-y: auto;  /* Scroll if messages exceed container height */
     background-color: #333;
     border-radius: 0.3125em;
     padding: 0.3125em;
@@ -284,13 +301,15 @@ body {
   }
   
   #chat-form {
-    display: flex;
+    display: flex;       /* Places input & button side-by-side */
+    flex-wrap: nowrap;   /* Prevents wrapping onto a new line */
     gap: 0.3125em;
     margin: 0;
   }
   
   #chat-input {
-    flex: 1;
+    flex: 1;             /* Fills available horizontal space */
+    min-width: 0;        /* Allows input to shrink if needed */
     padding: 0.5em;
     border: 0.0625em solid #444;
     border-radius: 0.3125em;
@@ -299,6 +318,8 @@ body {
   }
   
   button {
+    flex: 0 0 auto;       /* Button won't shrink or grow */
+    white-space: nowrap;  /* Prevents button text from wrapping */
     padding: 0.5em;
     background-color: #25a0de;
     color: #000;
@@ -312,6 +333,7 @@ body {
   button:hover {
     background-color: #a67122;
   }
+  
   
   /* Username display in the room */
   #username-display {

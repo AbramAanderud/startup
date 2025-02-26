@@ -25,15 +25,16 @@ export function Room() {
 
   return (
     <main> 
-        <h1>CHATTER PAD</h1>
-        <Link to="/" id="home-button">EXIT</Link>
+        <header>
+          <h1>CHATTER PAD</h1>
+          <Link to="/" id="home-button">EXIT</Link>
+          <div id="gold-count">
+            <img src="images/final coin.png" alt="Coin" className="gold-icon" />
+            <span>: 1,000,000</span>
+          </div>
+          <div id="settings-button"></div>
+        </header>
 
-        <div id="gold-count">
-          <img src="images/final coin.png" alt="Coin" className="gold-icon" />
-          <span>: 1,000,000</span>
-        </div>
-
-        <div id="settings-button"></div>
 
         <div id="room-container">
           <div id="room">
