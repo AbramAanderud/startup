@@ -11,7 +11,7 @@ export function Login() {
     navigate('/room'); 
   };
   return (
-    <div className="login-wrapper">
+    <div className="login-page">
       <main className="login-container">
         <h1>CHATTER PAD</h1>
         <h2>LOGIN TO JOIN CHAT ROOM</h2>
