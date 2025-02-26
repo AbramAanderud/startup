@@ -1,19 +1,27 @@
-body {
+html, body {
     margin: 0;
     padding: 0;
-    background-color: black; 
+    width: 100%;
+    height: 100%;
+    background-color: black;
     color: white;
     font-family: Arial, sans-serif;
+    overflow-x: hidden;
     overflow-y: auto;
-    /* display: flex;  <-- remove if you only want horizontal centering */
-    /* flex-direction: column; */
-    /* align-items: center; */
-    /* justify-content: center; */
   }
+  
+  
 
   main {
-    margin-top: 140px; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Reserve space for the header by subtracting its height from 100vh */
+    min-height: calc(100vh - 140px);
+    padding-top: 140px; /* This pushes content down so it doesn't overlap the fixed header */
+    margin: 0;
   }
+  
   
   /* Keyframes and font definitions remain unchanged */
   @keyframes gradientText {
@@ -115,36 +123,33 @@ body {
   }
   
   #room-container {
-    margin: 2rem auto;       /* centers horizontally */
-    width: 90%;              /* or 90%, etc. */
-    height: 70vh;            /* 70% of the viewport height */
+    width: 80vw;           /* 80% of viewport width */
+    height: 60vh;          /* 60% of viewport height */
+    min-width: 600px;      /* don't shrink too small */
+    min-height: 400px;     
+    max-width: 1000px;     /* won't exceed the room’s width */
+    max-height: 700px;     /* won't exceed the room’s height */
     
-    min-width: 600px;        /* never narrower than 600px */
-    min-height: 500px;       /* never shorter than 500px */
-    
-    max-width: 1200px;       /* optional upper limit */
-    max-height: 900px;       /* optional upper limit */
-    
-    background-color: black;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 3px solid white;
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+    margin: 2rem auto;
     overflow: hidden;
     position: relative;
+    
+    border: 2px solid white;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+    background-color: black; /* ensures behind the room is black, not white */
   }
   
   
-  /* Room updated to fill container (with a repeating background) */
+  
   #room {
-    width: 100%;
-    height: 98%;
+    width: 1000px;   /* fixed room width */
+    height: 700px;   /* fixed room height */
     position: absolute;
     background-image: url('../images/best-carpet.jpeg');
-    background-size: 5% 5%;
-    background-repeat: repeat;
+    background-size: cover;
+    background-repeat: no-repeat;
   }
+
   
   /* Gold count display */
   #gold-count {
@@ -223,7 +228,6 @@ body {
     z-index: 3;
   }
   
-  /* Bar element using percentages and relative units */
   #bar {
     position: absolute;
     top: 16%;
@@ -235,21 +239,25 @@ body {
     border-radius: 0.625em 0.625em 0 0;
     border: 0.125em solid black;
     box-shadow: 0 0.3125em 0.625em rgba(0, 0, 0, 0.5);
-    z-index: 4;
+    z-index: 4; /* Bar is in front */
   }
   
   #bar-lower {
     position: absolute;
-    top: 25%;
+    /* 16% + 12% = 28% so it aligns just below the bar */
+    top: 27%;
     left: 50%;
-    width: 87%;
-    height: 9%;
+    width: 90%;
+    height: 6%; /* Adjust to your taste so it doesn’t overlap the bar */
     background-color: rgb(92, 32, 0);
-    transform: translateX(-50%);
+    /* Use the same transform so it matches the bar's 3D angle */
+    transform: translateX(-50%) perspective(500px) rotateX(30deg);
+    border-radius: 0;
     border: 0.125em solid black;
     box-shadow: none;
-    z-index: 3;
+    z-index: 3; /* Behind the main bar */
   }
+  
   
   /* Tables and chairs use percentages relative to the room container */
   .table {

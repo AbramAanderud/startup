@@ -1,38 +1,35 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import Player from './player';
+import Chair from './chair';
+import '../app.css'; 
 
 export function Room() {
-  // Retrieve login name from localStorage (set by your login page)
   const loginName = localStorage.getItem("loginName") || "Player";
-  
-  // We'll use state to track the player's position (in pixels)
-  // These values represent the player’s coordinates on the map.
-  const [position, setPosition] = useState({ x: 100, y: 100 });
-  
-  // A ref to hold the currently pressed arrow keys (so we don’t re-render every key event)
-  const heldDirections = useRef([]);
-  const speed = 2; // pixels per frame
 
-  // Refs for the map element (to move the camera) and the container (for dimensions)
-  const mapRef = useRef(null);
+  // Track player position in the room (in pixels)
+  const [playerPos, setPlayerPos] = useState({ x: 100, y: 100 });
+  const heldKeys = useRef([]);
+  const speed = 4; // pixels per frame
+
+  // Refs for container and room (the fixed "map")
   const containerRef = useRef(null);
+  const roomRef = useRef(null);
 
-  // Set up key event listeners for arrow keys
+  // Keyboard event listeners for arrow keys
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
-        if (!heldDirections.current.includes(e.key)) {
-          heldDirections.current.push(e.key);
+        if (!heldKeys.current.includes(e.key)) {
+          heldKeys.current.push(e.key);
         }
       }
     };
-
     const handleKeyUp = (e) => {
       if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
-        heldDirections.current = heldDirections.current.filter(dir => dir !== e.key);
+        heldKeys.current = heldKeys.current.filter(key => key !== e.key);
       }
     };
-
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
     return () => {
@@ -41,40 +38,48 @@ export function Room() {
     };
   }, []);
 
-  // Game loop: update position and camera based on held keys
+  // Game loop: update player position and adjust camera
   useEffect(() => {
-    let animationFrameId;
-
+    let frameId;
     const update = () => {
-      setPosition(prevPos => {
-        let { x, y } = prevPos;
-        // Use the first held direction (if any)
-        const currentDir = heldDirections.current[0];
-        if (currentDir) {
-          if (currentDir === "ArrowUp") y -= speed;
-          if (currentDir === "ArrowDown") y += speed;
-          if (currentDir === "ArrowLeft") x -= speed;
-          if (currentDir === "ArrowRight") x += speed;
-        }
+      setPlayerPos(prev => {
+        let { x, y } = prev;
+        const key = heldKeys.current[0];
+        if (key === "ArrowUp") y -= speed;
+        if (key === "ArrowDown") y += speed;
+        if (key === "ArrowLeft") x -= speed;
+        if (key === "ArrowRight") x += speed;
         return { x, y };
       });
 
-      // Update the camera: center the map so that the player appears centered in the container
-      if (mapRef.current && containerRef.current) {
+      // Clamp player position so that the player stays inside the room (1000x700)
+      setPlayerPos(prev => ({
+        x: Math.max(0, Math.min(prev.x, 1000 - 40)), // 40 = player width
+        y: Math.max(0, Math.min(prev.y, 700 - 40))    // 40 = player height
+      }));
+
+      // Adjust camera: center the room relative to the player
+      if (containerRef.current && roomRef.current) {
         const containerWidth = containerRef.current.clientWidth;
         const containerHeight = containerRef.current.clientHeight;
-        // We subtract the player's position so that when x increases, the map shifts left.
-        const translateX = containerWidth / 2 - position.x;
-        const translateY = containerHeight / 2 - position.y;
-        mapRef.current.style.transform = `translate(${translateX}px, ${translateY}px)`;
+        const centerX = containerWidth / 2 - 20; // 20 = half player width
+        const centerY = containerHeight / 2 - 20; // 20 = half player height
+
+        let offsetX = centerX - playerPos.x;
+        let offsetY = centerY - playerPos.y;
+
+        // Clamp offset so that the room's boundaries are respected:
+        offsetX = Math.min(0, Math.max(offsetX, containerWidth - 1000));
+        offsetY = Math.min(0, Math.max(offsetY, containerHeight - 700));
+
+        roomRef.current.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
       }
 
-      animationFrameId = requestAnimationFrame(update);
+      frameId = requestAnimationFrame(update);
     };
-
-    animationFrameId = requestAnimationFrame(update);
-    return () => cancelAnimationFrame(animationFrameId);
-  }, [position]); // We depend on position so that camera updates when it changes
+    frameId = requestAnimationFrame(update);
+    return () => cancelAnimationFrame(frameId);
+  }, [playerPos]);
 
   return (
     <main>
@@ -82,59 +87,39 @@ export function Room() {
         <h1>CHATTER PAD</h1>
         <Link to="/" id="home-button">EXIT</Link>
         <div id="gold-count">
-          {/* Keep your coin image if desired */}
           <img src="images/final coin.png" alt="Coin" className="gold-icon" />
           <span>: 1,000,000</span>
         </div>
         <div id="settings-button"></div>
       </header>
 
-      {/* The room container is scaled to simulate “zoom in” */}
-      <div id="room-container" ref={containerRef} style={{ transform: "scale(1.1)", overflow: "hidden" }}>
-        {/* The map is larger than the container; its position is updated by our game loop */}
-        <div
-          id="room"
-          ref={mapRef}
-          style={{
-            position: "absolute",
-            width: "2000px",
-            height: "2000px",
-            backgroundColor: "#555", // simple background color for the map
-          }}
-        >
-          {/* You can add additional elements to the map here */}
-          
-          {/* Player square */}
-          <div
-            className="player"
-            style={{
-              position: "absolute",
-              width: "40px",
-              height: "40px",
-              backgroundColor: "red",
-              transform: `translate(${position.x}px, ${position.y}px)`,
-              transition: "transform 0.05s linear",
-            }}
-          >
-            {/* Login name label above the square */}
-            <div
-              style={{
-                position: "absolute",
-                top: "-20px",
-                width: "100%",
-                textAlign: "center",
-                color: "white",
-                fontSize: "12px",
-                textShadow: "1px 1px 2px black"
-              }}
-            >
-              {loginName}
-            </div>
+      {/* Fixed-size container acting as the viewport */}
+      <div id="room-container" ref={containerRef}>
+        {/* The room is fixed size (1000x700px) and represents the complete "world" */}
+        <div id="room" ref={roomRef}>
+          <div id="wall-back"></div>
+          <div id="username-display">{loginName}</div>
+          <div id="bar">Bar area</div>
+          <div id="bar-lower"></div>
+          <div className="picture-frame" id="frame-1">
+            <img src="/images/blob.webp" alt="Picture 1" />
           </div>
+          <div className="picture-frame" id="frame-2">
+            <img src="/images/michalagnelo.jpg" alt="Picture 2" />
+          </div>
+          <div className="table" id="table-1">0/4</div>
+          {/* Render a Chair component – you can add more chairs/tables as needed */}
+          <Chair 
+            id="chair-1" 
+            position={{ x: 400, y: 300 }} 
+            onSit={() => setPlayerPos({ x: 400, y: 300 })}
+          />
+          {/* Render the Player */}
+          <Player position={playerPos} loginName={loginName} />
         </div>
       </div>
 
-      {/* Chat box remains at fixed position */}
+      {/* Chat box remains fixed */}
       <div id="chat-box">
         <div id="chat-messages">
           {/* Render chat messages here */}
