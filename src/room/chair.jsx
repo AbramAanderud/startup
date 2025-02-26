@@ -1,3 +1,4 @@
+// src/components/Chair.jsx
 import React from 'react';
 
 export default function Chair({ position, onSit, id }) {
@@ -14,6 +15,8 @@ export default function Chair({ position, onSit, id }) {
         height: "50px",
         backgroundColor: "#8B4513",
         border: "2px solid #654321",
+        borderRadius: "50%",
+        transform: "perspective(500px) rotateX(30deg)",
         cursor: "pointer"
       }}
     >

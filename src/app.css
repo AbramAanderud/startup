@@ -10,105 +10,33 @@ html, body {
     overflow-y: auto;
   }
   
-  
-
   main {
     display: flex;
     justify-content: center;
     align-items: center;
-    /* Reserve space for the header by subtracting its height from 100vh */
     min-height: calc(100vh - 140px);
-    padding-top: 140px; /* This pushes content down so it doesn't overlap the fixed header */
+    padding-top: 140px;
     margin: 0;
   }
   
-  @keyframes gradientText {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
-  
-  @font-face {
-    font-family: 'western';
-    src: url('../fonts/WesterngamesOutlineRegular-2yDv.ttf') format('truetype');
-    font-weight: bold;
-    font-style: normal;
-  }
-  
-  @font-face {
-    font-family: 'arcade';
-    src: url('../fonts/E4DigitalArcadeV2Regular-wZOw.ttf') format('truetype');
-    font-weight: bold;
-    font-style: normal;
-  }
-  
-  .animated-text {
-    font-family: 'PezFont', sans-serif;
-    font-size: 3rem; /* 48px equivalent */
-    font-weight: bold;
-    background: linear-gradient(45deg, #ff0000, #ff7300, #ffeb00, #47ff00, #00ffee, #0040ff, #8000ff);
-    background-size: 400% 400%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: gradientText 5s ease infinite;
-  }
-  
-  @keyframes waveEffect {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
-  }
-  
-  .wavy-text span {
-    display: inline-block;
-    animation: waveEffect 1.5s infinite ease-in-out;
-  }
-  
-  .wavy-text span:nth-child(1) { animation-delay: 0s; }
-  .wavy-text span:nth-child(2) { animation-delay: 0.1s; }
-  .wavy-text span:nth-child(3) { animation-delay: 0.2s; }
-  .wavy-text span:nth-child(4) { animation-delay: 0.3s; }
-  .wavy-text span:nth-child(5) { animation-delay: 0.4s; }
-  .wavy-text span:nth-child(6) { animation-delay: 0.5s; }
-  .wavy-text span:nth-child(7) { animation-delay: 0.6s; }
-  
-  @keyframes flicker {
-    0% { opacity: 0.1; text-shadow: 0 0 0.3125em #ff7300, 0 0 0.625em #ff7300, 0 0 0.9375em #ff7300; }
-    50% { opacity: 1; text-shadow: 0 0 0.625em #ffeb00, 0 0 1.25em #ffeb00, 0 0 1.875em #ffeb00; }
-    100% { opacity: 0.1; text-shadow: 0 0 0.3125em #ff7300, 0 0 0.625em #ff7300, 0 0 0.9375em #ff7300; }
-  }
-  
-  @font-face {
-    font-family: 'PezFont';
-    src: url('../fonts/PezFont-Zpe8.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
-  }
-  
-  @font-face {
-    font-family: 'PezFont';
-    src: url('../fonts/PezFont-3lr6.ttf') format('truetype');
-    font-weight: bold;
-    font-style: normal;
-  }
-
+  /* Header */
   header {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    background: black; /* or a semi-transparent color if desired */
+    background: black;
     padding: 0.5rem 1rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    z-index: 100; /* ensure it's above other content */
+    z-index: 100;
   }
   
-  /* Responsive heading */
   h1 {
     font-family: 'PezFont', sans-serif !important;
     font-weight: normal;
-    font-size: 3.125rem; /* 50px equivalent */
+    font-size: 3.125rem;
     background: linear-gradient(45deg, #ff0000, #ff7300, #ffeb00, #47ff00, #00ffee, #0040ff, #8000ff);
     background-size: 400% 400%;
     -webkit-background-clip: text;
@@ -117,39 +45,36 @@ html, body {
     line-height: 1;
     text-align: center;
     width: 100%;
-    padding-bottom: 0.625rem; /* 10px equivalent */
+    padding-bottom: 0.625rem;
   }
   
+  /* Room Container */
   #room-container {
-    width: 80vw;           /* 80% of viewport width */
-    height: 73vh;          /* 60% of viewport height */
-    min-width: 600px;      /* don't shrink too small */
-    min-height: 400px;     
-    max-width: 1500px;     /* won't exceed the room’s width */
-    max-height: 1200px;     /* won't exceed the room’s height */
-    
+    width: 80vw;
+    height: 73vh;
+    min-width: 600px;
+    min-height: 400px;
+    max-width: 1500px;
+    max-height: 1200px;
     margin: 2rem auto;
     overflow: hidden;
     position: relative;
-    
     border: 2px solid white;
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
-    background-color: black; /* ensures behind the room is black, not white */
+    box-shadow: 0 0 15px rgba(255,255,255,0.2);
+    background-color: black;
   }
   
-  
-  
+  /* Room (World) */
   #room {
-    width: 1500px;   /* fixed room width */
-    height: 1200px;   /* fixed room height */
+    width: 1500px;
+    height: 1200px;
     position: absolute;
     background-image: url('../images/best-carpet.jpeg');
     background-repeat: repeat;
     background-size: 50% 50%;
   }
-
   
-  /* Gold count display */
+  /* Gold Count */
   #gold-count {
     font-family: 'arcade', sans-serif;
     font-weight: normal;
@@ -175,7 +100,7 @@ html, body {
     filter: drop-shadow(0 0 0.3em #ffeb00);
   }
   
-  /* Home button, positioned at top left */
+  /* Home Button */
   #home-button {
     position: fixed;
     top: 1%;
@@ -195,10 +120,10 @@ html, body {
   
   #home-button:hover {
     transform: scale(1.05);
-    box-shadow: 0 0 0.9375em rgba(255, 255, 255, 0.6);
+    box-shadow: 0 0 0.9375em rgba(255,255,255,0.6);
   }
   
-  /* Settings button, positioned at top right */
+  /* Settings Button */
   #settings-button {
     position: fixed;
     top: 1%;
@@ -212,7 +137,7 @@ html, body {
     z-index: 20;
   }
   
-  /* Wall background updated */
+  /* Wall Background */
   #wall-back {
     position: absolute;
     top: 0;
@@ -226,131 +151,150 @@ html, body {
     z-index: 3;
   }
   
+  /* Bar */
   #bar {
     position: absolute;
     top: 16%;
     left: 50%;
     width: 90%;
     height: 12%;
-    background-color: rgb(128, 63, 5);
+    background-color: rgb(128,63,5);
     transform: translateX(-50%) perspective(500px) rotateX(30deg);
     border-radius: 0.625em 0.625em 0 0;
-    border: 0.125em solid black;
-    box-shadow: 0 0.3125em 0.625em rgba(0, 0, 0, 0.5);
-    z-index: 4; /* Bar is in front */
+    border: 2px solid black;
+    box-shadow: 0 5px 10px rgba(0,0,0,0.5);
+    z-index: 4;
   }
   
+  /* Bar Lower */
   #bar-lower {
     position: absolute;
     top: 27%;
     left: 50%;
     width: 90%;
-    height: 6%; 
-    background-color: rgb(92, 32, 0);
+    height: 6%;
+    background-color: rgb(92,32,0);
     transform: translateX(-50%) perspective(500px) rotateX(30deg);
-    border-radius: 0;
-    border: 0.125em solid black;
+    border: 2px solid black;
     box-shadow: none;
-    z-index: 3; 
+    z-index: 3;
   }
-  
-  
+
+
   .table {
     position: absolute;
-    width: 80px;
-    height: 80px;
-    background-color: rgb(157, 76, 0);
+    width: 100px;       /* Updated fixed width */
+    height: 100px;      /* Updated fixed height */
+    background-color: rgb(157,76,0);
     border-radius: 50%;
     border: 2px solid black;
     transform: perspective(500px) rotateX(30deg);
-    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 5px 10px rgba(0,0,0,0.5);
     z-index: 10;
   }
   
   
+  /* Chair (Fixed Size) */
   .chair {
     position: absolute;
-    width: 50px;       /* Fixed width */
-    height: 50px;      /* Fixed height */
-    background-color: rgb(237, 144, 23);
-    border-radius: 8px;  /* Use 50% for a circle if desired */
+    width: 50px;
+    height: 50px;
+    background-color: rgb(237,144,23);
     border: 2px solid black;
+    border-radius: 50%;
     transform: perspective(500px) rotateX(30deg);
     z-index: 10;
   }
   
-
+  /* Bartender */
+  .bartender {
+    position: absolute;
+    width: 60px;
+    height: 120px;
+    background-color: blue;
+    left: calc(50% - 30px);
+    top: calc(16% + 12% - 60px);
+    cursor: pointer;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 12px;
+  }
+  
+  /* Chat Box */
   #chat-box {
     position: fixed;
     bottom: 2%;
     right: 2%;
     width: 20%;
-    min-width: 250px; /* Ensures there's always enough horizontal space */
+    min-width: 250px;
     height: 30%;
-    min-height: 200px; /* Ensures there's always enough vertical space */
+    min-height: 200px;
     display: flex;
     flex-direction: column;
-    background-color: rgba(0, 0, 0, 0.7);
-    border: 0.0625em solid #444;
-    border-radius: 0.625em;
-    padding: 0.625em;
+    background-color: rgba(0,0,0,0.7);
+    border: 1px solid #444;
+    border-radius: 10px;
+    padding: 10px;
     z-index: 15;
   }
   
   #chat-messages {
-    flex: 1;           /* Occupies remaining vertical space */
-    overflow-y: auto;  /* Scroll if messages exceed container height */
+    flex: 1;
+    overflow-y: auto;
     background-color: #333;
-    border-radius: 0.3125em;
-    padding: 0.3125em;
-    margin-bottom: 0.3125em;
+    border-radius: 5px;
+    padding: 5px;
+    margin-bottom: 5px;
   }
   
   #chat-form {
-    display: flex;       /* Places input & button side-by-side */
-    flex-wrap: nowrap;   /* Prevents wrapping onto a new line */
-    gap: 0.3125em;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 5px;
     margin: 0;
   }
   
   #chat-input {
-    flex: 1;             /* Fills available horizontal space */
-    min-width: 0;        /* Allows input to shrink if needed */
-    padding: 0.5em;
-    border: 0.0625em solid #444;
-    border-radius: 0.3125em;
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #444;
+    border-radius: 5px;
     background-color: #555;
     color: #fff;
   }
   
   button {
-    flex: 0 0 auto;       /* Button won't shrink or grow */
-    white-space: nowrap;  /* Prevents button text from wrapping */
-    padding: 0.5em;
+    flex: 0 0 auto;
+    white-space: nowrap;
+    padding: 8px;
     background-color: #25a0de;
     color: #000;
     border: none;
     cursor: pointer;
-    font-size: 0.875rem;
+    font-size: 14px;
     font-weight: bold;
-    border-radius: 0.3125em;
+    border-radius: 5px;
   }
   
   button:hover {
     background-color: #a67122;
   }
   
+  /* Username Display */
   #username-display {
     position: absolute;
     top: 1%;
     left: 2%;
-    background-color: rgba(0, 0, 0, 0.6);
+    background-color: rgba(0,0,0,0.6);
     color: white;
     font-family: 'arcade', sans-serif;
-    font-size: 0.625rem;
-    padding: 0.3125em 0.625em;
-    border-radius: 0.3125em;
-    border: 0.125em solid white;
+    font-size: 10px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    border: 1px solid white;
     text-align: center;
     z-index: 10;
   }
@@ -359,12 +303,12 @@ html, body {
   footer {
     width: 100%;
     text-align: center;
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: rgba(0,0,0,0.8);
     color: white;
-    font-size: 0.875rem;
+    font-size: 14px;
   }
   
-  /* Picture frames for images */
+  /* Picture Frames */
   .picture-frame {
     position: absolute;
     top: 1%;
@@ -372,7 +316,7 @@ html, body {
     height: 12%;
     background-color: #905933;
     border: 0.5em solid #883e06;
-    outline: 0.1875em solid rgb(145, 36, 36);
+    outline: 0.1875em solid rgb(145,36,36);
     padding: 0.3125em;
     z-index: 6;
   }
@@ -382,7 +326,7 @@ html, body {
     height: 100%;
     object-fit: cover;
   }
-
+  
   #frame-1 {
     left: 20%;
   }
@@ -390,29 +334,4 @@ html, body {
   #frame-2 {
     left: 65%;
   }
-
-  #table-1 { top: 50%; left: 10%; }
-  #table-2 { top: 70%; left: 32%; }
-  #table-3 { top: 50%; left: 50%; }
-  #table-4 { top: 70%; left: 70%; }
-  
-  #chair-1 { top: 63%; left: 12%; }
-  #chair-2 { top: 53%; left: 4%; }
-  #chair-3 { top: 46%; left: 15%; }
-  #chair-4 { top: 57%; left: 20%; }
-  
-  #chair-5 { top: 83%; left: 34%; }
-  #chair-6 { top: 73%; left: 27%; }
-  #chair-7 { top: 66%; left: 37%; }
-  #chair-8 { top: 72%; left: 42%; }
-  
-  #chair-9 { top: 63%; left: 52%; }
-  #chair-10 { top: 53%; left: 44%; }
-  #chair-11 { top: 46%; left: 55%; }
-  #chair-12 { top: 52%; left: 60%; }
-  
-  #chair-13 { top: 83%; left: 73%; }
-  #chair-14 { top: 73%; left: 65%; }
-  #chair-15 { top: 66%; left: 76%; }
-  #chair-16 { top: 72%; left: 81%; }
   
