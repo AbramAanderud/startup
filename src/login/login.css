@@ -130,7 +130,6 @@
     font-family: 'PezFont', sans-serif !important;
     font-weight: normal;
     font-size: 150px;
-    /* ...other h1 styles... */
     margin-bottom: 60px; 
     line-height: 1;
     padding-top: 2%;
@@ -146,8 +145,6 @@
     padding-top: 0.8%;
     padding-bottom: 2%;
   }
-  
-  /* Keep the rest of your login CSS similarly scoped */
   
 
 .animated-text {

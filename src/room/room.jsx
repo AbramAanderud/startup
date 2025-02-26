@@ -11,7 +11,8 @@ export function Room() {
   const [playerPos, setPlayerPos] = useState({ x: 100, y: 100 });
   const heldKeys = useRef([]);
   const speed = 4; // pixels per frame
-  
+
+  // Refs for container (viewport) and room (world)
   const containerRef = useRef(null);
   const roomRef = useRef(null);
 
@@ -50,29 +51,28 @@ export function Room() {
         return { x, y };
       });
 
-      // Clamp player position so that the player stays inside the room (1000x700)
+      // Clamp player position within the room (room size: 1500 x 1200)
       setPlayerPos(prev => ({
         x: Math.max(0, Math.min(prev.x, 1500 - 40)), // 40 = player width
         y: Math.max(0, Math.min(prev.y, 1200 - 40))    // 40 = player height
       }));
 
-      // Adjust camera: center the room relative to the player
+      // Adjust camera: center the viewport relative to the player
       if (containerRef.current && roomRef.current) {
         const containerWidth = containerRef.current.clientWidth;
         const containerHeight = containerRef.current.clientHeight;
-        const centerX = containerWidth / 2 - 20; // 20 = half player width
-        const centerY = containerHeight / 2 - 20; // 20 = half player height
+        const centerX = containerWidth / 2 - 20; // half player width
+        const centerY = containerHeight / 2 - 20; // half player height
 
         let offsetX = centerX - playerPos.x;
         let offsetY = centerY - playerPos.y;
 
-        // Clamp offset so that the room's boundaries are respected:
+        // Clamp offset so we don't show outside the room boundaries
         offsetX = Math.min(0, Math.max(offsetX, containerWidth - 1500));
         offsetY = Math.min(0, Math.max(offsetY, containerHeight - 1200));
 
         roomRef.current.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
       }
-
       frameId = requestAnimationFrame(update);
     };
     frameId = requestAnimationFrame(update);
@@ -91,9 +91,9 @@ export function Room() {
         <div id="settings-button"></div>
       </header>
 
-      {/* Fixed-size container acting as the viewport */}
-      <div id="room-container" ref={containerRef}>
-        {/* The room is fixed size (1000x700px) and represents the complete "world" */}
+      {/* Responsive viewport container; scale can be adjusted to affect zoom */}
+      <div id="room-container" ref={containerRef} style={{ transform: "scale(1.08)" }}>
+        {/* Fixed-size room (world) that is larger than the viewport */}
         <div id="room" ref={roomRef}>
           <div id="wall-back"></div>
           <div id="username-display">{loginName}</div>
@@ -105,14 +105,39 @@ export function Room() {
           <div className="picture-frame" id="frame-2">
             <img src="/images/michalagnelo.jpg" alt="Picture 2" />
           </div>
+
+          {/* All tables */}
           <div className="table" id="table-1">0/4</div>
-          {/* Render a Chair component – you can add more chairs/tables as needed */}
+          <div className="table" id="table-2">0/4</div>
+          <div className="table" id="table-3">0/4</div>
+          <div className="table" id="table-4">0/4</div>
+
+          {/* All 16 chairs as plain divs (their positions will be set via CSS) */}
+          <div className="chair" id="chair-1"></div>
+          <div className="chair" id="chair-2"></div>
+          <div className="chair" id="chair-3"></div>
+          <div className="chair" id="chair-4"></div>
+          <div className="chair" id="chair-5"></div>
+          <div className="chair" id="chair-6"></div>
+          <div className="chair" id="chair-7"></div>
+          <div className="chair" id="chair-8"></div>
+          <div className="chair" id="chair-9"></div>
+          <div className="chair" id="chair-10"></div>
+          <div className="chair" id="chair-11"></div>
+          <div className="chair" id="chair-12"></div>
+          <div className="chair" id="chair-13"></div>
+          <div className="chair" id="chair-14"></div>
+          <div className="chair" id="chair-15"></div>
+          <div className="chair" id="chair-16"></div>
+
+          {/* Optionally, render a clickable Chair for interactive seating */}
           <Chair 
-            id="chair-1" 
+            id="chair-interactive" 
             position={{ x: 400, y: 300 }} 
             onSit={() => setPlayerPos({ x: 400, y: 300 })}
           />
-          {/* Render the Player */}
+
+          {/* Render the Player (ensure it has a high z-index in its own styling) */}
           <Player position={playerPos} loginName={loginName} />
         </div>
       </div>

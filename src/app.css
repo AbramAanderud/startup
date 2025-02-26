@@ -242,44 +242,44 @@ html, body {
   
   #bar-lower {
     position: absolute;
-    /* 16% + 12% = 28% so it aligns just below the bar */
     top: 27%;
     left: 50%;
     width: 90%;
-    height: 6%; /* Adjust to your taste so it doesn’t overlap the bar */
+    height: 6%; 
     background-color: rgb(92, 32, 0);
-    /* Use the same transform so it matches the bar's 3D angle */
     transform: translateX(-50%) perspective(500px) rotateX(30deg);
     border-radius: 0;
     border: 0.125em solid black;
     box-shadow: none;
-    z-index: 3; /* Behind the main bar */
+    z-index: 3; 
   }
   
   
-  /* Tables and chairs use percentages relative to the room container */
   .table {
     position: absolute;
-    width: 9%;
-    height: 9%;
+    width: 80px;
+    height: 80px;
     background-color: rgb(157, 76, 0);
     border-radius: 50%;
-    border: 0.125em solid black;
+    border: 2px solid black;
     transform: perspective(500px) rotateX(30deg);
-    box-shadow: 0 0.3125em 0.625em rgba(0, 0, 0, 0.5);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5);
     z-index: 10;
   }
+  
   
   .chair {
     position: absolute;
-    width: 3.5%;
-    height: 3.5%;
+    width: 50px;       /* Fixed width */
+    height: 50px;      /* Fixed height */
     background-color: rgb(237, 144, 23);
-    border-radius: 50%;
-    border: 0.125em solid black;
+    border-radius: 8px;  /* Use 50% for a circle if desired */
+    border: 2px solid black;
     transform: perspective(500px) rotateX(30deg);
     z-index: 10;
   }
+  
+
   #chat-box {
     position: fixed;
     bottom: 2%;
@@ -340,8 +340,6 @@ html, body {
     background-color: #a67122;
   }
   
-  
-  /* Username display in the room */
   #username-display {
     position: absolute;
     top: 1%;
@@ -371,7 +369,7 @@ html, body {
     position: absolute;
     top: 1%;
     width: 16%;
-    height: 10%;
+    height: 12%;
     background-color: #905933;
     border: 0.5em solid #883e06;
     outline: 0.1875em solid rgb(145, 36, 36);
@@ -384,8 +382,7 @@ html, body {
     height: 100%;
     object-fit: cover;
   }
-  
-  /* Frame positions remain percentages */
+
   #frame-1 {
     left: 20%;
   }
@@ -393,8 +390,7 @@ html, body {
   #frame-2 {
     left: 65%;
   }
-  
-  /* Table and chair positions (already percentage based) */
+
   #table-1 { top: 50%; left: 10%; }
   #table-2 { top: 70%; left: 32%; }
   #table-3 { top: 50%; left: 50%; }
