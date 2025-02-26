@@ -2,6 +2,20 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 export function Room() {
+
+  const [messages, setMessages] = React.useState([]);
+  React.useEffect(() => {
+    const stored = localStorage.getItem('chatMessages');
+    if (stored) {
+      setMessages(JSON.parse(stored));
+    }
+  }, []);
+  
+  React.useEffect(() => {
+    localStorage.setItem('chatMessages', JSON.stringify(messages));
+  }, [messages]);
+
+
   return (
     <main> 
         <h1>CHATTER PAD</h1>

@@ -34,3 +34,10 @@ Testing and adding new note...
 - Can exhange large amounts of data with json
 - Can use promises to not interrupt main thread
 - Using async you can make promises pending because the execution function has no yet resolved
+- Can use javascript debugging to see the debugger while having the site preview open
+- Can use react to do color changes and for me this is good becasue I want to do blips and use settings to change there color.
+- Can useEffect every time something is rendered, using the hook you can add details to this. You can also use a clean up to release resources
+- Websocket messages can be mocked with set interval
+- Can use local storage to store sessions
+- Can use authstate to store app components
+
