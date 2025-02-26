@@ -11,12 +11,10 @@ export function Room() {
   const [playerPos, setPlayerPos] = useState({ x: 100, y: 100 });
   const heldKeys = useRef([]);
   const speed = 4; // pixels per frame
-
-  // Refs for container and room (the fixed "map")
+  
   const containerRef = useRef(null);
   const roomRef = useRef(null);
 
-  // Keyboard event listeners for arrow keys
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
@@ -54,8 +52,8 @@ export function Room() {
 
       // Clamp player position so that the player stays inside the room (1000x700)
       setPlayerPos(prev => ({
-        x: Math.max(0, Math.min(prev.x, 1000 - 40)), // 40 = player width
-        y: Math.max(0, Math.min(prev.y, 700 - 40))    // 40 = player height
+        x: Math.max(0, Math.min(prev.x, 1500 - 40)), // 40 = player width
+        y: Math.max(0, Math.min(prev.y, 1200 - 40))    // 40 = player height
       }));
 
       // Adjust camera: center the room relative to the player
@@ -69,8 +67,8 @@ export function Room() {
         let offsetY = centerY - playerPos.y;
 
         // Clamp offset so that the room's boundaries are respected:
-        offsetX = Math.min(0, Math.max(offsetX, containerWidth - 1000));
-        offsetY = Math.min(0, Math.max(offsetY, containerHeight - 700));
+        offsetX = Math.min(0, Math.max(offsetX, containerWidth - 1500));
+        offsetY = Math.min(0, Math.max(offsetY, containerHeight - 1200));
 
         roomRef.current.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
       }

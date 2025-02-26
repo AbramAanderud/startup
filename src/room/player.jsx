@@ -9,7 +9,8 @@ export default function Player({ position, loginName }) {
         width: "40px",
         height: "40px",
         backgroundColor: "red",
-        transform: `translate(${position.x}px, ${position.y}px)`
+        transform: `translate(${position.x}px, ${position.y}px)`,
+        zIndex: 20
       }}
     >
       <div style={{

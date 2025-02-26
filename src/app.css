@@ -3,7 +3,7 @@ html, body {
     padding: 0;
     width: 100%;
     height: 100%;
-    background-color: black;
+    background-color: black !important;
     color: white;
     font-family: Arial, sans-serif;
     overflow-x: hidden;
@@ -22,8 +22,6 @@ html, body {
     margin: 0;
   }
   
-  
-  /* Keyframes and font definitions remain unchanged */
   @keyframes gradientText {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
@@ -124,11 +122,11 @@ html, body {
   
   #room-container {
     width: 80vw;           /* 80% of viewport width */
-    height: 60vh;          /* 60% of viewport height */
+    height: 73vh;          /* 60% of viewport height */
     min-width: 600px;      /* don't shrink too small */
     min-height: 400px;     
-    max-width: 1000px;     /* won't exceed the room’s width */
-    max-height: 700px;     /* won't exceed the room’s height */
+    max-width: 1500px;     /* won't exceed the room’s width */
+    max-height: 1200px;     /* won't exceed the room’s height */
     
     margin: 2rem auto;
     overflow: hidden;
@@ -142,12 +140,12 @@ html, body {
   
   
   #room {
-    width: 1000px;   /* fixed room width */
-    height: 700px;   /* fixed room height */
+    width: 1500px;   /* fixed room width */
+    height: 1200px;   /* fixed room height */
     position: absolute;
     background-image: url('../images/best-carpet.jpeg');
-    background-size: cover;
-    background-repeat: no-repeat;
+    background-repeat: repeat;
+    background-size: 50% 50%;
   }
 
   
