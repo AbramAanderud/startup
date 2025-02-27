@@ -52,6 +52,7 @@ export function Room() {
   const [chatInput, setChatInput] = useState("");
   const [chatCollapsed, setChatCollapsed] = useState(false);
   const [drinkPopups, setDrinkPopups] = useState([]);
+  const [chatPopups, setChatPopups] = useState([]);
 
   useEffect(() => {
     const stored = localStorage.getItem("chatMessages");
@@ -73,14 +74,25 @@ export function Room() {
     return () => clearInterval(intervalId);
   }, []);
 
+  const chatInputRef = useRef(null);
+
   const handleChatSubmit = (e) => {
     e.preventDefault();
     if (chatInput.trim() !== "") {
       const newMsg = { from: loginName, text: chatInput.trim() };
       setChatMessages(prev => [...prev, newMsg]);
+      const id = Date.now();
+      const popup = { id, text: chatInput.trim(), pos: { x: playerPos.x, y: playerPos.y - 20 } };
+      setChatPopups(prev => [...prev, popup]);
+      setTimeout(() => {
+        setChatPopups(prev => prev.filter(p => p.id !== id));
+      }, 5000);
       setChatInput("");
+  
+      chatInputRef.current && chatInputRef.current.blur();
     }
   };
+
 
   const containerRef = useRef(null);
   const roomRef = useRef(null);
@@ -210,11 +222,11 @@ export function Room() {
     if (gold >= 5) {
       setGold(prev => prev - 5);
       const id = Date.now();
-      const popup = { id, text: "Bought drink for $5", pos: { x: playerPos.x, y: playerPos.y - 5 } };
+      const popup = { id, text: "Bought drink for $5", pos: { x: playerPos.x, y: playerPos.y - 10 } };
       setDrinkPopups(prev => [...prev, popup]);
       setTimeout(() => {
         setDrinkPopups(prev => prev.filter(p => p.id !== id));
-      }, 1000);
+      }, 2000);
     } else {
       alert("Not enough gold!");
     }
@@ -227,10 +239,9 @@ export function Room() {
         <Link to="/" id="home-button">EXIT</Link>
         <div id="gold-count">
           <img src="images/final coin.png" alt="Coin" className="gold-icon" />
-          <span>: ${gold.toLocaleString()}</span>
+          <span>: {gold.toLocaleString()}</span>
         </div>
-        <div id="settings-button" onClick={() => setShowSettings(true)} style={{ cursor: "pointer" }}>
-        </div>
+        <div id="settings-button" onClick={() => setShowSettings(true)} style={{ cursor: "pointer" }}></div>
       </header>
       {showSettings && (
         <div id="settings-modal" style={{ position:"fixed", top:0, left:0, width:"100vw", height:"100vh", backgroundColor:"rgba(0,0,0,0.5)", display:"flex", alignItems:"center", justifyContent:"center", zIndex:1000 }} onClick={() => setShowSettings(false)}>
@@ -251,10 +262,32 @@ export function Room() {
               position: "absolute",
               left: popup.pos.x,
               top: popup.pos.y,
-              color: "gold",
+              background: "gold",
+              color: "black",
+              padding: "5px 10px",
+              border: "1px solid black",
+              borderRadius: "20px",
               fontWeight: "bold",
               zIndex: 9999,
-              animation: "fadeOut 1s forwards",
+              animation: "fadeOut 2s forwards",
+              pointerEvents: "none"
+            }}>
+              {popup.text}
+            </div>
+          ))}
+          {chatPopups.map(popup => (
+            <div key={popup.id} style={{
+              position: "absolute",
+              left: popup.pos.x,
+              top: popup.pos.y,
+              background: "white",
+              color: "black",
+              padding: "5px 10px",
+              border: "1px solid black",
+              borderRadius: "20px",
+              fontWeight: "bold",
+              zIndex: 9999,
+              animation: "fadeOut 5s forwards",
               pointerEvents: "none"
             }}>
               {popup.text}
@@ -320,7 +353,15 @@ export function Room() {
           </div>
         )}
         <form id="chat-form" onSubmit={handleChatSubmit} style={{ display:"flex" }}>
-          <input type="text" id="chat-input" placeholder="Type here and press Enter" value={chatInput} onChange={(e) => setChatInput(e.target.value)} style={{ flex:1, marginRight:"0.5em" }} />
+          <input
+            type="text"
+            id="chat-input"
+            placeholder="Type here and press Enter"
+            value={chatInput}
+            onChange={(e) => setChatInput(e.target.value)}
+            ref={chatInputRef}
+            style={{ flex: 1, marginRight: "0.5em" }}
+          />
         </form>
       </div>
     </main>

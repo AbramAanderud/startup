@@ -40,4 +40,5 @@ Testing and adding new note...
 - Websocket messages can be mocked with set interval
 - Can use local storage to store sessions
 - Can use authstate to store app components
+- Can make it so you exit out of chat box after chatting instead of having to click
 

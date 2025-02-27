@@ -28,3 +28,4 @@ export default function Table({ id, occupancy, maxOccupancy }) {
     </div>
   );
 }
+

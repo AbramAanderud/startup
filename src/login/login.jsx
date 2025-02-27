@@ -33,15 +33,6 @@ export function Login() {
           <button type="submit">LOGIN</button>
           <button type="button" onClick={handleSubmit}>CREATE</button>
         </form>
-
-        <nav>
-          <menu>
-            <h5>
-              Can also join here: 
-              <button onClick={() => navigate('/room')}>room</button>
-            </h5>
-          </menu>
-        </nav>
       </main>
     </div>
   );

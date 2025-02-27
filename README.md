@@ -108,8 +108,8 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
-- [ ] **All functionality implemented or mocked out** - I did not complete this part of the deliverable.
-- [ ] **Hooks** - I did not complete this part of the deliverable.
+- [x] **All functionality implemented or mocked out** - I added everything that I wanted to, I have a settings button where you can change the color of your character, this color also shows up on your display name in chat. I made it so the player username is shown above their character and they load into the middle of the room when they join and when they leave and join they join in the same place. Made gold so you passively get gold by being on the site. Can click bar tender to by drinks that give a pop up on you to show you bought one and it costs gold. Made it so you can click bar and tables to sit there and they have limtted seats and aknowledge when you leave. I also added another pop up for when you type in chat your character says it and its stored in chat too. I also made chat colapsable. localStorage is stubbing out my database stuff for now like position, chat messages, gold. 
+- [x] **Hooks** - I used useState to store dynamic values like position, gold, messages, pop ups. I used useEffect to set up keyboard listeners for player movement, I got the camera following code from https://codepen.io/punkydrewster713/pen/WNrXPrb, I used useEffect to run a timer that increments the gold that your get, I also used it to time pop ups for drinks and messages. 
 
 ## 🚀 Service deliverable
 
