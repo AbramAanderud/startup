@@ -1,4 +1,3 @@
-// src/components/chair.jsx
 import React from 'react';
 
 export default function Chair({ position, onSit, id }) {

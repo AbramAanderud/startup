@@ -8,7 +8,7 @@ export default function Table({ id, occupancy, maxOccupancy }) {
       id={id}
       style={{
         position: "absolute",
-        width: "225px",     // fixed table size (3/4 of 300px)
+        width: "225px",    
         height: "225px",
         backgroundColor: "rgb(157,76,0)",
         borderRadius: "50%",

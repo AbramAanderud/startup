@@ -1,4 +1,3 @@
-// src/components/room.jsx
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Player from './player';
@@ -11,15 +10,13 @@ export function Room() {
   const navigate = useNavigate();
   const loginName = localStorage.getItem("loginName") || "Player";
 
-  // Initialize player position from localStorage or default (middle below the bar)
   const [playerPos, setPlayerPos] = useState(() => {
     const savedPos = localStorage.getItem("playerPos");
     return savedPos ? JSON.parse(savedPos) : { x: 750, y: 500 };
   });
   const heldKeys = useRef([]);
-  const speed = 4;
-
-  // Occupancy states for tables (each table seats up to 4) and bar (up to 10)
+  const speed = 6;
+  const [gold, setGold] = useState(0);
   const [tableOccupancy, setTableOccupancy] = useState({
     table1: 0,
     table2: 0,
@@ -27,79 +24,67 @@ export function Room() {
     table4: 0,
   });
   const [barOccupancy, setBarOccupancy] = useState(0);
-  // Track current seat: either { type: "table", id: "table1", seatIndex: 0 } or { type: "bar", seatIndex: 0 }
   const [currentSeat, setCurrentSeat] = useState(null);
-
-  // Player color controlled via a hue slider (0–360). Computed as an HSL color.
   const [playerColorHue, setPlayerColorHue] = useState(0);
   const playerColor = `hsl(${playerColorHue}, 100%, 50%)`;
-
-  // Settings overlay visibility.
   const [showSettings, setShowSettings] = useState(false);
-
-  // Table centers for 4 tables (upper two shifted up by 40px)
   const tableCenters = {
-    table1: { x: 400 + 112.5, y: 560 + 112.5 },
-    table2: { x: 1000 + 112.5, y: 560 + 112.5 },
-    table3: { x: 400 + 112.5, y: 900 + 112.5 },
-    table4: { x: 1000 + 112.5, y: 900 + 112.5 },
+    table1: { x: 512.5, y: 672.5 },
+    table2: { x: 1112.5, y: 672.5 },
+    table3: { x: 512.5, y: 1012.5 },
+    table4: { x: 1112.5, y: 1012.5 },
   };
-
-  // Seat offsets for tables (using 130px so chairs appear closer)
   const tableSeatOffsets = [
     { x: -130, y: 0 },
     { x: 130, y: 0 },
     { x: 0, y: -130 },
     { x: 0, y: 130 }
   ];
-
-  // Bar chairs positions (relative to #bar-lower)
   const barChairCount = 10;
-  const barLowerWidth = 1350;  // 90% of 1500px room width
-  const barLowerHeight = 72;   // 6% of 1200px room height
+  const barLowerWidth = 1350;
+  const barLowerHeight = 72;
   const barChairPositions = Array.from({ length: barChairCount }, (_, i) => {
     const x = ((i + 1) * barLowerWidth) / (barChairCount + 1) - (75 / 2);
     const y = (barLowerHeight - 75) / 2;
     return { x, y };
   });
-
-  // Chat state
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
   const [chatCollapsed, setChatCollapsed] = useState(false);
+  const [drinkPopups, setDrinkPopups] = useState([]);
 
-  // Load stored chat messages on mount.
   useEffect(() => {
     const stored = localStorage.getItem("chatMessages");
-    if (stored) {
-      setChatMessages(JSON.parse(stored));
-    }
+    if (stored) setChatMessages(JSON.parse(stored));
   }, []);
 
-  // Persist chat messages whenever they change.
   useEffect(() => {
     localStorage.setItem("chatMessages", JSON.stringify(chatMessages));
   }, [chatMessages]);
 
-  // Persist player position.
   useEffect(() => {
     localStorage.setItem("playerPos", JSON.stringify(playerPos));
   }, [playerPos]);
 
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setGold(prev => prev + 10);
+    }, 5000);
+    return () => clearInterval(intervalId);
+  }, []);
+
   const handleChatSubmit = (e) => {
     e.preventDefault();
     if (chatInput.trim() !== "") {
-      const newMessage = { from: loginName, text: chatInput.trim() };
-      setChatMessages(prev => [...prev, newMessage]);
+      const newMsg = { from: loginName, text: chatInput.trim() };
+      setChatMessages(prev => [...prev, newMsg]);
       setChatInput("");
     }
   };
 
-  // Refs for viewport container and room (world)
   const containerRef = useRef(null);
   const roomRef = useRef(null);
 
-  // When the player moves via arrow keys and is seated, free their seat.
   useEffect(() => {
     if (heldKeys.current.length > 0 && currentSeat !== null) {
       if (currentSeat.type === "table") {
@@ -114,7 +99,6 @@ export function Room() {
     }
   }, [heldKeys.current.length, currentSeat]);
 
-  // Keyboard event listeners.
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
@@ -136,7 +120,6 @@ export function Room() {
     };
   }, []);
 
-  // Game loop: update player position and adjust camera.
   useEffect(() => {
     let frameId;
     const update = () => {
@@ -149,22 +132,19 @@ export function Room() {
         if (key === "ArrowRight") x += speed;
         return { x, y };
       });
-
-      // Clamp position within the room (1500 x 1200)
       setPlayerPos(prev => ({
         x: Math.max(0, Math.min(prev.x, 1500 - 40)),
         y: Math.max(0, Math.min(prev.y, 1200 - 40))
       }));
-
       if (containerRef.current && roomRef.current) {
-        const containerWidth = containerRef.current.clientWidth;
-        const containerHeight = containerRef.current.clientHeight;
-        const centerX = containerWidth / 2 - 20;
-        const centerY = containerHeight / 2 - 20;
+        const cw = containerRef.current.clientWidth;
+        const ch = containerRef.current.clientHeight;
+        const centerX = cw / 2 - 20;
+        const centerY = ch / 2 - 20;
         let offsetX = centerX - playerPos.x;
         let offsetY = centerY - playerPos.y;
-        offsetX = Math.min(0, Math.max(offsetX, containerWidth - 1500));
-        offsetY = Math.min(0, Math.max(offsetY, containerHeight - 1200));
+        offsetX = Math.min(0, Math.max(offsetX, cw - 1500));
+        offsetY = Math.min(0, Math.max(offsetY, ch - 1200));
         roomRef.current.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
       }
       frameId = requestAnimationFrame(update);
@@ -173,11 +153,8 @@ export function Room() {
     return () => cancelAnimationFrame(frameId);
   }, [playerPos]);
 
-  // Function to seat at a table.
   const sitAtTable = (tableId) => {
-    if (currentSeat && currentSeat.type === "table" && currentSeat.id === tableId) {
-      return;
-    }
+    if (currentSeat && currentSeat.type === "table" && currentSeat.id === tableId) return;
     if (tableOccupancy[tableId] < 4) {
       if (currentSeat) {
         if (currentSeat.type === "table" && currentSeat.id !== tableId) {
@@ -204,11 +181,8 @@ export function Room() {
     }
   };
 
-  // Function to seat at the bar.
   const sitAtBar = () => {
-    if (currentSeat && currentSeat.type === "bar") {
-      return;
-    }
+    if (currentSeat && currentSeat.type === "bar") return;
     if (barOccupancy < 10) {
       if (currentSeat) {
         if (currentSeat.type === "table") {
@@ -232,6 +206,20 @@ export function Room() {
     }
   };
 
+  const handleBuyDrink = () => {
+    if (gold >= 5) {
+      setGold(prev => prev - 5);
+      const id = Date.now();
+      const popup = { id, text: "Bought drink for $5", pos: { x: playerPos.x, y: playerPos.y - 5 } };
+      setDrinkPopups(prev => [...prev, popup]);
+      setTimeout(() => {
+        setDrinkPopups(prev => prev.filter(p => p.id !== id));
+      }, 1000);
+    } else {
+      alert("Not enough gold!");
+    }
+  };
+
   return (
     <main>
       <header>
@@ -239,81 +227,45 @@ export function Room() {
         <Link to="/" id="home-button">EXIT</Link>
         <div id="gold-count">
           <img src="images/final coin.png" alt="Coin" className="gold-icon" />
-          <span>: 1,000,000</span>
+          <span>: ${gold.toLocaleString()}</span>
         </div>
-        {/* Settings button toggles the overlay */}
-        <div 
-          id="settings-button" 
-          onClick={() => setShowSettings(true)}
-          style={{ cursor: "pointer" }}
-        >
+        <div id="settings-button" onClick={() => setShowSettings(true)} style={{ cursor: "pointer" }}>
         </div>
       </header>
-
-      {/* Settings Modal Overlay */}
       {showSettings && (
-        <div 
-          id="settings-modal" 
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            backgroundColor: "rgba(0,0,0,0.5)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000
-          }}
-          onClick={() => setShowSettings(false)}
-        >
-          <div 
-            style={{
-              backgroundColor: "rgba(0,0,0,0.8)",
-              padding: "20px",
-              borderRadius: "8px",
-              color: "white",
-              textAlign: "center"
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div id="settings-modal" style={{ position:"fixed", top:0, left:0, width:"100vw", height:"100vh", backgroundColor:"rgba(0,0,0,0.5)", display:"flex", alignItems:"center", justifyContent:"center", zIndex:1000 }} onClick={() => setShowSettings(false)}>
+          <div style={{ backgroundColor:"rgba(0,0,0,0.8)", padding:"20px", borderRadius:"8px", color:"white", textAlign:"center" }} onClick={(e) => e.stopPropagation()}>
             <h2>Change Your Color</h2>
-            <input 
-              type="range" 
-              min="0" 
-              max="360" 
-              value={playerColorHue}
-              onChange={(e) => setPlayerColorHue(e.target.value)}
-            />
-            <div style={{ marginTop: "10px" }}>
+            <input type="range" min="0" max="360" value={playerColorHue} onChange={(e) => setPlayerColorHue(e.target.value)} />
+            <div style={{ marginTop:"10px" }}>
               Current Color: <span style={{ color: playerColor }}>{playerColor}</span>
             </div>
-            <button 
-              onClick={() => setShowSettings(false)}
-              style={{ marginTop: "10px", padding: "5px 10px", cursor: "pointer" }}
-            >
-              Close
-            </button>
+            <button onClick={() => setShowSettings(false)} style={{ marginTop:"10px", padding:"5px 10px", cursor:"pointer" }}>Close</button>
           </div>
         </div>
       )}
-
-      {/* Viewport container */}
       <div id="room-container" ref={containerRef} style={{ transform: "scale(1.08)" }}>
         <div id="room" ref={roomRef}>
+          {drinkPopups.map(popup => (
+            <div key={popup.id} style={{
+              position: "absolute",
+              left: popup.pos.x,
+              top: popup.pos.y,
+              color: "gold",
+              fontWeight: "bold",
+              zIndex: 9999,
+              animation: "fadeOut 1s forwards",
+              pointerEvents: "none"
+            }}>
+              {popup.text}
+            </div>
+          ))}
           <div id="wall-back"></div>
           <div id="username-display">{loginName}</div>
-          {/* Bar area is clickable for seating */}
           <div id="bar" onClick={sitAtBar}>Bar area</div>
           <div id="bar-lower">
             {barChairPositions.map((pos, idx) => (
-              <Chair 
-                key={`bar-chair-${idx}`}
-                id={`bar-chair-${idx}`}
-                position={pos}
-                onSit={sitAtBar}
-              />
+              <Chair key={`bar-chair-${idx}`} id={`bar-chair-${idx}`} position={pos} onSit={sitAtBar} />
             ))}
           </div>
           <div className="picture-frame" id="frame-1">
@@ -322,30 +274,18 @@ export function Room() {
           <div className="picture-frame" id="frame-2">
             <img src="/images/michalagnelo.jpg" alt="Picture 2" />
           </div>
-
-          {/* Four tables arranged in a centered square formation (upper two moved up by 40px) */}
-          <div 
-            onClick={() => sitAtTable("table1")}
-            style={{ position: "absolute", left: "400px", top: "560px", cursor: "pointer" }}>
+          <div onClick={() => sitAtTable("table1")} style={{ position:"absolute", left:"400px", top:"560px", cursor:"pointer" }}>
             <Table id="table1" occupancy={tableOccupancy.table1} maxOccupancy={4} />
           </div>
-          <div 
-            onClick={() => sitAtTable("table2")}
-            style={{ position: "absolute", left: "1000px", top: "560px", cursor: "pointer" }}>
+          <div onClick={() => sitAtTable("table2")} style={{ position:"absolute", left:"1000px", top:"560px", cursor:"pointer" }}>
             <Table id="table2" occupancy={tableOccupancy.table2} maxOccupancy={4} />
           </div>
-          <div 
-            onClick={() => sitAtTable("table3")}
-            style={{ position: "absolute", left: "400px", top: "900px", cursor: "pointer" }}>
+          <div onClick={() => sitAtTable("table3")} style={{ position:"absolute", left:"400px", top:"900px", cursor:"pointer" }}>
             <Table id="table3" occupancy={tableOccupancy.table3} maxOccupancy={4} />
           </div>
-          <div 
-            onClick={() => sitAtTable("table4")}
-            style={{ position: "absolute", left: "1000px", top: "900px", cursor: "pointer" }}>
+          <div onClick={() => sitAtTable("table4")} style={{ position:"absolute", left:"1000px", top:"900px", cursor:"pointer" }}>
             <Table id="table4" occupancy={tableOccupancy.table4} maxOccupancy={4} />
           </div>
-
-          {/* Render table chairs around each table */}
           {Object.entries(tableCenters).map(([tableId, center]) =>
             tableSeatOffsets.map((offset, seatIndex) => {
               const chairPos = {
@@ -353,40 +293,20 @@ export function Room() {
                 y: center.y + offset.y - 37.5
               };
               return (
-                <Chair
-                  key={`${tableId}-chair-${seatIndex}`}
-                  id={`${tableId}-chair-${seatIndex}`}
-                  position={chairPos}
-                  onSit={() => sitAtTable(tableId)}
-                />
+                <Chair key={`${tableId}-chair-${seatIndex}`} id={`${tableId}-chair-${seatIndex}`} position={chairPos} onSit={() => sitAtTable(tableId)} />
               );
             })
           )}
-
-          {/* Render the Bartender */}
-          <Bartender onBuyDrink={() => alert("You bought a drink!")} />
-
-          {/* Render the Player (pass dynamic color) */}
+          <Bartender onBuyDrink={handleBuyDrink} />
           <Player position={playerPos} loginName={loginName} color={playerColor} />
         </div>
       </div>
-
-      {/* Collapsible Chat Box */}
-      <div 
-        id="chat-box"
-        style={{
-          height: chatCollapsed ? "50px" : "30%",
-          minHeight: chatCollapsed ? "50px" : "200px",
-          transition: "height 0.3s ease"
-        }}
-      >
-        <button 
-          onClick={() => setChatCollapsed(!chatCollapsed)}
-          style={{ marginBottom: "0.5em", cursor: "pointer" }}>
+      <div id="chat-box" style={{ height: chatCollapsed ? "50px" : "30%", minHeight: chatCollapsed ? "50px" : "200px", transition:"height 0.3s ease", display:"flex", flexDirection:"column" }}>
+        <button onClick={() => setChatCollapsed(!chatCollapsed)} style={{ marginBottom:"0.5em", cursor:"pointer" }}>
           {chatCollapsed ? "Show Chat" : "Hide Chat"}
         </button>
         {!chatCollapsed && (
-          <div id="chat-messages">
+          <div id="chat-messages" style={{ flex:1, overflowY:"auto", marginBottom:"0.5em" }}>
             {chatMessages.map((msg, idx) => (
               <div key={idx}>
                 {msg.from === loginName ? (
@@ -394,20 +314,13 @@ export function Room() {
                 ) : (
                   <strong>{msg.from}:</strong>
                 )}{" "}
-                <span style={{ color: "white" }}>{msg.text}</span>
+                <span style={{ color:"white" }}>{msg.text}</span>
               </div>
             ))}
           </div>
         )}
-        <form id="chat-form" onSubmit={handleChatSubmit}>
-          <input 
-            type="text" 
-            id="chat-input" 
-            placeholder="Type here" 
-            value={chatInput}
-            onChange={(e) => setChatInput(e.target.value)}
-          />
-          <button type="submit">Chat</button>
+        <form id="chat-form" onSubmit={handleChatSubmit} style={{ display:"flex" }}>
+          <input type="text" id="chat-input" placeholder="Type here and press Enter" value={chatInput} onChange={(e) => setChatInput(e.target.value)} style={{ flex:1, marginRight:"0.5em" }} />
         </form>
       </div>
     </main>

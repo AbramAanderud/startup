@@ -1,4 +1,3 @@
-// src/components/login.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './login.css';
@@ -9,7 +8,6 @@ export function Login() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Use the email (or any field you prefer) as the player name
     localStorage.setItem("loginName", email);
     navigate('/room'); 
   };

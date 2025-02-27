@@ -24,6 +24,11 @@ html, body {
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
   }
+
+  @keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }  
   
   @font-face {
     font-family: 'western';
