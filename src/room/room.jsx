@@ -26,7 +26,6 @@ export function Room() {
   const [barOccupancy, setBarOccupancy] = useState(0);
 
   // Define table center positions for 4 tables shifted 100px higher.
-  // For example, table1's container top changes from 700px to 600px.
   const tableCenters = {
     table1: { x: 400 + 112.5, y: 600 + 112.5 },
     table2: { x: 1000 + 112.5, y: 600 + 112.5 },
@@ -35,7 +34,6 @@ export function Room() {
   };
 
   // Adjust table seat offsets to bring chairs closer to the tables.
-  // For instance, using 130 instead of 150 moves them 20px closer.
   const tableSeatOffsets = [
     { x: -130, y: 0 },   // left seat
     { x: 130, y: 0 },    // right seat
@@ -43,15 +41,43 @@ export function Room() {
     { x: 0, y: 130 }     // bottom seat
   ];
 
-  // Bar chairs remain unchanged.
+  // Bar chairs positions (relative to #bar-lower)
   const barChairCount = 10;
   const barLowerWidth = 1350;  // 90% of 1500px room width
   const barLowerHeight = 72;   // 6% of 1200px room height
   const barChairPositions = Array.from({ length: barChairCount }, (_, i) => {
     const x = ((i + 1) * barLowerWidth) / (barChairCount + 1) - (75 / 2);
-    const y = (barLowerHeight - 75) / 2;  // centers the 75px chair vertically
+    const y = (barLowerHeight - 75) / 2;
     return { x, y };
   });
+
+  // Chat state: messages and input
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatInput, setChatInput] = useState("");
+  const [chatCollapsed, setChatCollapsed] = useState(false);
+
+  // On mount, load any stored chat messages from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem("chatMessages");
+    if (stored) {
+      setChatMessages(JSON.parse(stored));
+    }
+  }, []);
+
+  // Whenever chatMessages changes, store them in localStorage
+  useEffect(() => {
+    localStorage.setItem("chatMessages", JSON.stringify(chatMessages));
+  }, [chatMessages]);
+
+  // Handler for chat form submission
+  const handleChatSubmit = (e) => {
+    e.preventDefault();
+    if (chatInput.trim() !== "") {
+      const newMessage = { from: loginName, text: chatInput.trim() };
+      setChatMessages(prev => [...prev, newMessage]);
+      setChatInput("");
+    }
+  };
 
   // Refs for viewport container and room (world)
   const containerRef = useRef(null);
@@ -92,7 +118,7 @@ export function Room() {
         return { x, y };
       });
 
-      // Clamp player position within the room (room size: 1500 x 1200)
+      // Clamp player position within the room (1500 x 1200)
       setPlayerPos(prev => ({
         x: Math.max(0, Math.min(prev.x, 1500 - 40)),
         y: Math.max(0, Math.min(prev.y, 1200 - 40))
@@ -139,7 +165,7 @@ export function Room() {
     setBarOccupancy(prev => {
       const index = prev % barChairPositions.length;
       const seatPos = barChairPositions[index];
-      const barLowerOffset = { x: 75, y: 324 }; // as defined earlier
+      const barLowerOffset = { x: 75, y: 324 };
       setPlayerPos({
         x: barLowerOffset.x + seatPos.x,
         y: barLowerOffset.y + seatPos.y
@@ -147,9 +173,6 @@ export function Room() {
       return prev + 1;
     });
   };
-
-  // Chat collapse state
-  const [chatCollapsed, setChatCollapsed] = useState(false);
 
   return (
     <main>
@@ -171,7 +194,6 @@ export function Room() {
           {/* Bar area is clickable for seating */}
           <div id="bar" onClick={sitAtBar}>Bar area</div>
           <div id="bar-lower">
-            {/* Render 10 bar chairs positioned on top of the lower bar */}
             {barChairPositions.map((pos, idx) => (
               <Chair 
                 key={`bar-chair-${idx}`}
@@ -210,7 +232,7 @@ export function Room() {
             <Table id="table4" occupancy={tableOccupancy.table4} maxOccupancy={4} />
           </div>
 
-          {/* Render table chairs around each table (adjacent to the table) */}
+          {/* Render table chairs around each table */}
           {Object.entries(tableCenters).map(([tableId, center]) =>
             tableSeatOffsets.map((offset, seatIndex) => {
               const chairPos = {
@@ -236,6 +258,7 @@ export function Room() {
         </div>
       </div>
 
+      {/* Collapsible Chat Box */}
       <div 
         id="chat-box"
         style={{
@@ -251,11 +274,21 @@ export function Room() {
         </button>
         {!chatCollapsed && (
           <div id="chat-messages">
-            {/* Chat messages go here */}
+            {chatMessages.map((msg, idx) => (
+              <div key={idx}>
+                <strong>{msg.from}:</strong> {msg.text}
+              </div>
+            ))}
           </div>
         )}
-        <form id="chat-form">
-          <input type="text" id="chat-input" placeholder="Type here" />
+        <form id="chat-form" onSubmit={handleChatSubmit}>
+          <input 
+            type="text" 
+            id="chat-input" 
+            placeholder="Type here" 
+            value={chatInput}
+            onChange={(e) => setChatInput(e.target.value)}
+          />
           <button type="submit">Chat</button>
         </form>
       </div>

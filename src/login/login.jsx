@@ -1,15 +1,19 @@
-import React from 'react';
+// src/components/login.jsx
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './login.css';
 
 export function Login() {
-
   const navigate = useNavigate();
+  const [email, setEmail] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    // Use the email (or any field you prefer) as the player name
+    localStorage.setItem("loginName", email);
     navigate('/room'); 
   };
+
   return (
     <div className="login-page">
       <main className="login-container">
@@ -18,7 +22,12 @@ export function Login() {
 
         <form onSubmit={handleSubmit}>
           <div>
-            <input type="text" placeholder="your@email.com" />
+            <input 
+              type="text" 
+              placeholder="your@email.com" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
           </div>
           <div>
             <input type="password" placeholder="password" />
@@ -28,12 +37,12 @@ export function Login() {
         </form>
 
         <nav>
-            <menu>
-              <h5>
-                Can also join here: 
-                <button onClick={() => navigate('/room')}>room</button>
-              </h5>
-            </menu>
+          <menu>
+            <h5>
+              Can also join here: 
+              <button onClick={() => navigate('/room')}>room</button>
+            </h5>
+          </menu>
         </nav>
       </main>
     </div>
