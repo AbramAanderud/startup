@@ -37,7 +37,7 @@ export function Room() {
   const tableSeatOffsets = [
     { x: -130, y: 0 },
     { x: 130, y: 0 },
-    { x: 0, y: -130 },
+    { x: 0, y: -115 },
     { x: 0, y: 130 }
   ];
   const barChairCount = 10;
