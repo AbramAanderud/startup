@@ -19,7 +19,40 @@ html, body {
     margin: 0;
   }
   
-  /* Header */
+  @keyframes gradientText {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  
+  @font-face {
+    font-family: 'western';
+    src: url('../fonts/WesterngamesOutlineRegular-2yDv.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'arcade';
+    src: url('../fonts/E4DigitalArcadeV2Regular-wZOw.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'PezFont';
+    src: url('../fonts/PezFont-Zpe8.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'PezFont';
+    src: url('../fonts/PezFont-3lr6.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+  }
+  
   header {
     position: fixed;
     top: 0;
@@ -48,7 +81,6 @@ html, body {
     padding-bottom: 0.625rem;
   }
   
-  /* Room Container */
   #room-container {
     width: 80vw;
     height: 73vh;
@@ -64,7 +96,6 @@ html, body {
     background-color: black;
   }
   
-  /* Room (World) */
   #room {
     width: 1500px;
     height: 1200px;
@@ -74,7 +105,6 @@ html, body {
     background-size: 50% 50%;
   }
   
-  /* Gold Count */
   #gold-count {
     font-family: 'arcade', sans-serif;
     font-weight: normal;
@@ -100,7 +130,6 @@ html, body {
     filter: drop-shadow(0 0 0.3em #ffeb00);
   }
   
-  /* Home Button */
   #home-button {
     position: fixed;
     top: 1%;
@@ -123,7 +152,6 @@ html, body {
     box-shadow: 0 0 0.9375em rgba(255,255,255,0.6);
   }
   
-  /* Settings Button */
   #settings-button {
     position: fixed;
     top: 1%;
@@ -137,7 +165,6 @@ html, body {
     z-index: 20;
   }
   
-  /* Wall Background */
   #wall-back {
     position: absolute;
     top: 0;
@@ -151,7 +178,6 @@ html, body {
     z-index: 3;
   }
   
-  /* Bar */
   #bar {
     position: absolute;
     top: 16%;
@@ -166,7 +192,6 @@ html, body {
     z-index: 4;
   }
   
-  /* Bar Lower */
   #bar-lower {
     position: absolute;
     top: 27%;
@@ -179,12 +204,11 @@ html, body {
     box-shadow: none;
     z-index: 3;
   }
-
-
+  
   .table {
     position: absolute;
-    width: 100px;       /* Updated fixed width */
-    height: 100px;      /* Updated fixed height */
+    width: 225px;
+    height: 225px;
     background-color: rgb(157,76,0);
     border-radius: 50%;
     border: 2px solid black;
@@ -193,12 +217,10 @@ html, body {
     z-index: 10;
   }
   
-  
-  /* Chair (Fixed Size) */
   .chair {
     position: absolute;
-    width: 50px;
-    height: 50px;
+    width: 75px;
+    height: 75px;
     background-color: rgb(237,144,23);
     border: 2px solid black;
     border-radius: 50%;
@@ -206,16 +228,15 @@ html, body {
     z-index: 10;
   }
   
-  /* Bartender */
   .bartender {
     position: absolute;
     width: 60px;
     height: 120px;
     background-color: blue;
     left: calc(50% - 30px);
-    top: calc(16% + 12% - 60px);
+    top: calc(16% - 50px);
     cursor: pointer;
-    z-index: 5;
+    z-index: 3;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -223,7 +244,6 @@ html, body {
     font-size: 12px;
   }
   
-  /* Chat Box */
   #chat-box {
     position: fixed;
     bottom: 2%;
@@ -283,7 +303,6 @@ html, body {
     background-color: #a67122;
   }
   
-  /* Username Display */
   #username-display {
     position: absolute;
     top: 1%;
@@ -299,7 +318,6 @@ html, body {
     z-index: 10;
   }
   
-  /* Footer */
   footer {
     width: 100%;
     text-align: center;
@@ -308,7 +326,6 @@ html, body {
     font-size: 14px;
   }
   
-  /* Picture Frames */
   .picture-frame {
     position: absolute;
     top: 1%;

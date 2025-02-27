@@ -1,4 +1,4 @@
-// src/components/Player.jsx
+// src/components/player.jsx
 import React from 'react';
 
 export default function Player({ position, loginName }) {
