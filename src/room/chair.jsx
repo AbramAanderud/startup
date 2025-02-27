@@ -11,7 +11,7 @@ export default function Chair({ position, onSit, id }) {
         position: "absolute",
         left: `${position.x}px`,
         top: `${position.y}px`,
-        width: "75px",       // fixed size (half of original)
+        width: "75px",       
         height: "75px",
         backgroundColor: "#8B4513",
         border: "2px solid #654321",
@@ -20,7 +20,6 @@ export default function Chair({ position, onSit, id }) {
         cursor: "pointer"
       }}
     >
-      {/* Optional label – adjust padding so the text appears centered below the chair */}
       <div style={{
         fontSize: "10px",
         color: "white",

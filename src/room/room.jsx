@@ -10,35 +10,40 @@ import '../app.css';
 export function Room() {
   const loginName = localStorage.getItem("loginName") || "Player";
 
-  // Player position in room (in pixels)
-  const [playerPos, setPlayerPos] = useState({ x: 100, y: 100 });
+  // Initialize player position from localStorage (if available) or default.
+  const [playerPos, setPlayerPos] = useState(() => {
+    const savedPos = localStorage.getItem("playerPos");
+    return savedPos ? JSON.parse(savedPos) : { x: 100, y: 100 };
+  });
   const heldKeys = useRef([]);
   const speed = 4;
 
-  // Occupancy state for 4 tables (max 4 seats each)
+  // Occupancy state for tables (each table can seat up to 4)
   const [tableOccupancy, setTableOccupancy] = useState({
     table1: 0,
     table2: 0,
     table3: 0,
     table4: 0,
   });
-  // Bar occupancy for 10 seats
+  // Occupancy for bar (up to 10 seats)
   const [barOccupancy, setBarOccupancy] = useState(0);
+  // Track where the player is currently seated.
+  const [currentSeat, setCurrentSeat] = useState(null);
 
-  // Define table center positions for 4 tables shifted 100px higher.
+  // Table centers for 4 tables. Upper two shifted up by 40px.
   const tableCenters = {
-    table1: { x: 400 + 112.5, y: 600 + 112.5 },
-    table2: { x: 1000 + 112.5, y: 600 + 112.5 },
+    table1: { x: 400 + 112.5, y: 560 + 112.5 },
+    table2: { x: 1000 + 112.5, y: 560 + 112.5 },
     table3: { x: 400 + 112.5, y: 900 + 112.5 },
     table4: { x: 1000 + 112.5, y: 900 + 112.5 },
   };
 
-  // Adjust table seat offsets to bring chairs closer to the tables.
+  // Seat offsets for tables (using 130px so chairs are closer)
   const tableSeatOffsets = [
-    { x: -130, y: 0 },   // left seat
-    { x: 130, y: 0 },    // right seat
-    { x: 0, y: -130 },   // top seat
-    { x: 0, y: 130 }     // bottom seat
+    { x: -130, y: 0 },
+    { x: 130, y: 0 },
+    { x: 0, y: -130 },
+    { x: 0, y: 130 }
   ];
 
   // Bar chairs positions (relative to #bar-lower)
@@ -51,12 +56,12 @@ export function Room() {
     return { x, y };
   });
 
-  // Chat state: messages and input
+  // Chat state
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
   const [chatCollapsed, setChatCollapsed] = useState(false);
 
-  // On mount, load any stored chat messages from localStorage
+  // Load stored chat messages on mount.
   useEffect(() => {
     const stored = localStorage.getItem("chatMessages");
     if (stored) {
@@ -64,12 +69,17 @@ export function Room() {
     }
   }, []);
 
-  // Whenever chatMessages changes, store them in localStorage
+  // Persist chat messages.
   useEffect(() => {
     localStorage.setItem("chatMessages", JSON.stringify(chatMessages));
   }, [chatMessages]);
 
-  // Handler for chat form submission
+  // Save player position to localStorage whenever it changes.
+  useEffect(() => {
+    localStorage.setItem("playerPos", JSON.stringify(playerPos));
+  }, [playerPos]);
+
+  // Chat form handler.
   const handleChatSubmit = (e) => {
     e.preventDefault();
     if (chatInput.trim() !== "") {
@@ -79,10 +89,26 @@ export function Room() {
     }
   };
 
-  // Refs for viewport container and room (world)
+  // Refs for viewport container and room.
   const containerRef = useRef(null);
   const roomRef = useRef(null);
 
+  // Free the seat if the player moves.
+  useEffect(() => {
+    if (heldKeys.current.length > 0 && currentSeat !== null) {
+      if (currentSeat.type === "table") {
+        setTableOccupancy(prev => ({
+          ...prev,
+          [currentSeat.id]: Math.max(prev[currentSeat.id] - 1, 0)
+        }));
+      } else if (currentSeat.type === "bar") {
+        setBarOccupancy(prev => Math.max(prev - 1, 0));
+      }
+      setCurrentSeat(null);
+    }
+  }, [heldKeys.current.length, currentSeat]);
+
+  // Keyboard event listeners.
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
@@ -104,7 +130,7 @@ export function Room() {
     };
   }, []);
 
-  // Game loop: update player position and adjust camera
+  // Game loop: update player position and adjust camera.
   useEffect(() => {
     let frameId;
     const update = () => {
@@ -118,7 +144,7 @@ export function Room() {
         return { x, y };
       });
 
-      // Clamp player position within the room (1500 x 1200)
+      // Clamp within the room.
       setPlayerPos(prev => ({
         x: Math.max(0, Math.min(prev.x, 1500 - 40)),
         y: Math.max(0, Math.min(prev.y, 1200 - 40))
@@ -141,37 +167,67 @@ export function Room() {
     return () => cancelAnimationFrame(frameId);
   }, [playerPos]);
 
-  // When clicking a table, seat the player at the next available seat.
+  // Function to seat at a table.
   const sitAtTable = (tableId) => {
-    setTableOccupancy(prev => {
-      const current = prev[tableId];
-      if (current < 4) {
-        const seatOffset = tableSeatOffsets[current];
-        const tableCenter = tableCenters[tableId];
-        // Calculate the top-left position for the chair:
-        const newPos = {
-          x: tableCenter.x + seatOffset.x - 37.5,
-          y: tableCenter.y + seatOffset.y - 37.5
-        };
-        setPlayerPos(newPos);
-        return { ...prev, [tableId]: current + 1 };
+    // If already seated at the same table, do nothing.
+    if (currentSeat && currentSeat.type === "table" && currentSeat.id === tableId) {
+      return;
+    }
+    // Only seat if there's an available seat.
+    if (tableOccupancy[tableId] < 4) {
+      // Free previous seat if necessary.
+      if (currentSeat) {
+        if (currentSeat.type === "table" && currentSeat.id !== tableId) {
+          setTableOccupancy(prev => ({
+            ...prev,
+            [currentSeat.id]: Math.max(prev[currentSeat.id] - 1, 0)
+          }));
+        } else if (currentSeat.type === "bar") {
+          setBarOccupancy(prev => Math.max(prev - 1, 0));
+        }
       }
-      return prev;
-    });
+      const seatIndex = tableOccupancy[tableId];
+      const tableCenter = tableCenters[tableId];
+      const offset = tableSeatOffsets[seatIndex];
+      const newPos = {
+        x: tableCenter.x + offset.x - 37.5,
+        y: tableCenter.y + offset.y - 37.5
+      };
+      setTableOccupancy(prev => ({ ...prev, [tableId]: prev[tableId] + 1 }));
+      setCurrentSeat({ type: "table", id: tableId, seatIndex });
+      setPlayerPos(newPos);
+    } else {
+      alert("This table is full!");
+    }
   };
 
-  // When clicking a bar chair, seat the player at that bar position.
+  // Function to seat at the bar.
   const sitAtBar = () => {
-    setBarOccupancy(prev => {
-      const index = prev % barChairPositions.length;
-      const seatPos = barChairPositions[index];
+    // If already seated at the bar, do nothing.
+    if (currentSeat && currentSeat.type === "bar") {
+      return;
+    }
+    if (barOccupancy < 10) {
+      if (currentSeat) {
+        if (currentSeat.type === "table") {
+          setTableOccupancy(prev => ({
+            ...prev,
+            [currentSeat.id]: Math.max(prev[currentSeat.id] - 1, 0)
+          }));
+        }
+      }
+      const seatIndex = barOccupancy;
+      const seatPos = barChairPositions[seatIndex];
       const barLowerOffset = { x: 75, y: 324 };
+      setBarOccupancy(prev => prev + 1);
+      setCurrentSeat({ type: "bar", seatIndex });
       setPlayerPos({
         x: barLowerOffset.x + seatPos.x,
         y: barLowerOffset.y + seatPos.y
       });
-      return prev + 1;
-    });
+    } else {
+      alert("The bar is full!");
+    }
   };
 
   return (
@@ -210,15 +266,16 @@ export function Room() {
             <img src="/images/michalagnelo.jpg" alt="Picture 2" />
           </div>
 
-          {/* Four tables arranged in a centered square formation, shifted 100px up */}
+          {/* Four tables arranged in a centered square formation.
+              Upper two tables moved up by 40px (top now 560px). */}
           <div 
             onClick={() => sitAtTable("table1")}
-            style={{ position: "absolute", left: "400px", top: "600px", cursor: "pointer" }}>
+            style={{ position: "absolute", left: "400px", top: "560px", cursor: "pointer" }}>
             <Table id="table1" occupancy={tableOccupancy.table1} maxOccupancy={4} />
           </div>
           <div 
             onClick={() => sitAtTable("table2")}
-            style={{ position: "absolute", left: "1000px", top: "600px", cursor: "pointer" }}>
+            style={{ position: "absolute", left: "1000px", top: "560px", cursor: "pointer" }}>
             <Table id="table2" occupancy={tableOccupancy.table2} maxOccupancy={4} />
           </div>
           <div 
