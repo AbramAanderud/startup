@@ -10,10 +10,11 @@ import '../app.css';
 export function Room() {
   const loginName = localStorage.getItem("loginName") || "Player";
 
-  // Initialize player position from localStorage (if available) or default.
+  // Initialize player position from localStorage (if available) or default to middle of room below the bar.
   const [playerPos, setPlayerPos] = useState(() => {
     const savedPos = localStorage.getItem("playerPos");
-    return savedPos ? JSON.parse(savedPos) : { x: 100, y: 100 };
+    // Default position: centered horizontally (750) and 500px down vertically.
+    return savedPos ? JSON.parse(savedPos) : { x: 750, y: 500 };
   });
   const heldKeys = useRef([]);
   const speed = 4;
@@ -27,10 +28,13 @@ export function Room() {
   });
   // Occupancy for bar (up to 10 seats)
   const [barOccupancy, setBarOccupancy] = useState(0);
-  // Track where the player is currently seated.
+  // Track the seat where the player is currently sitting.
+  // It is either null or an object like { type: "table", id: "table1", seatIndex: 1 }
+  // or { type: "bar", seatIndex: 3 }.
   const [currentSeat, setCurrentSeat] = useState(null);
 
-  // Table centers for 4 tables. Upper two shifted up by 40px.
+  // Table centers for 4 tables.
+  // Upper two tables are shifted up by 40px (from 600px to 560px).
   const tableCenters = {
     table1: { x: 400 + 112.5, y: 560 + 112.5 },
     table2: { x: 1000 + 112.5, y: 560 + 112.5 },
@@ -38,12 +42,13 @@ export function Room() {
     table4: { x: 1000 + 112.5, y: 900 + 112.5 },
   };
 
-  // Seat offsets for tables (using 130px so chairs are closer)
+  // Seat offsets – using 130px so chairs appear closer.
+  // We'll use the occupancy count as the seat index.
   const tableSeatOffsets = [
-    { x: -130, y: 0 },
-    { x: 130, y: 0 },
-    { x: 0, y: -130 },
-    { x: 0, y: 130 }
+    { x: -130, y: 0 },   // seat index 0
+    { x: 130, y: 0 },    // seat index 1
+    { x: 0, y: -130 },   // seat index 2
+    { x: 0, y: 130 }     // seat index 3
   ];
 
   // Bar chairs positions (relative to #bar-lower)
@@ -69,7 +74,7 @@ export function Room() {
     }
   }, []);
 
-  // Persist chat messages.
+  // Persist chat messages whenever they change.
   useEffect(() => {
     localStorage.setItem("chatMessages", JSON.stringify(chatMessages));
   }, [chatMessages]);
@@ -89,11 +94,11 @@ export function Room() {
     }
   };
 
-  // Refs for viewport container and room.
+  // Refs for viewport container and room (world)
   const containerRef = useRef(null);
   const roomRef = useRef(null);
 
-  // Free the seat if the player moves.
+  // When the player moves (via arrow keys) and is seated, free the seat.
   useEffect(() => {
     if (heldKeys.current.length > 0 && currentSeat !== null) {
       if (currentSeat.type === "table") {
@@ -108,7 +113,7 @@ export function Room() {
     }
   }, [heldKeys.current.length, currentSeat]);
 
-  // Keyboard event listeners.
+  // Keyboard event listeners
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
@@ -144,7 +149,7 @@ export function Room() {
         return { x, y };
       });
 
-      // Clamp within the room.
+      // Clamp player position within the room (1500 x 1200).
       setPlayerPos(prev => ({
         x: Math.max(0, Math.min(prev.x, 1500 - 40)),
         y: Math.max(0, Math.min(prev.y, 1200 - 40))
