@@ -1,7 +1,6 @@
-// src/components/player.jsx
 import React from 'react';
 
-export default function Player({ position, loginName }) {
+export default function Player({ position, loginName, color }) {
   return (
     <div 
       className="player"
@@ -9,7 +8,7 @@ export default function Player({ position, loginName }) {
         position: "absolute",
         width: "40px",
         height: "40px",
-        backgroundColor: "red",
+        backgroundColor: color || "red",
         transform: `translate(${position.x}px, ${position.y}px)`,
         zIndex: 999
       }}

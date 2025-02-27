@@ -1,6 +1,6 @@
 // src/components/room.jsx
 import React, { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Player from './player';
 import Chair from './chair';
 import Table from './table';
@@ -8,33 +8,36 @@ import Bartender from './bartender';
 import '../app.css';
 
 export function Room() {
+  const navigate = useNavigate();
   const loginName = localStorage.getItem("loginName") || "Player";
 
-  // Initialize player position from localStorage (if available) or default to middle of room below the bar.
+  // Initialize player position from localStorage or default (middle below the bar)
   const [playerPos, setPlayerPos] = useState(() => {
     const savedPos = localStorage.getItem("playerPos");
-    // Default position: centered horizontally (750) and 500px down vertically.
     return savedPos ? JSON.parse(savedPos) : { x: 750, y: 500 };
   });
   const heldKeys = useRef([]);
   const speed = 4;
 
-  // Occupancy state for tables (each table can seat up to 4)
+  // Occupancy states for tables (each table seats up to 4) and bar (up to 10)
   const [tableOccupancy, setTableOccupancy] = useState({
     table1: 0,
     table2: 0,
     table3: 0,
     table4: 0,
   });
-  // Occupancy for bar (up to 10 seats)
   const [barOccupancy, setBarOccupancy] = useState(0);
-  // Track the seat where the player is currently sitting.
-  // It is either null or an object like { type: "table", id: "table1", seatIndex: 1 }
-  // or { type: "bar", seatIndex: 3 }.
+  // Track current seat: either { type: "table", id: "table1", seatIndex: 0 } or { type: "bar", seatIndex: 0 }
   const [currentSeat, setCurrentSeat] = useState(null);
 
-  // Table centers for 4 tables.
-  // Upper two tables are shifted up by 40px (from 600px to 560px).
+  // Player color controlled via a hue slider (0–360). Computed as an HSL color.
+  const [playerColorHue, setPlayerColorHue] = useState(0);
+  const playerColor = `hsl(${playerColorHue}, 100%, 50%)`;
+
+  // Settings overlay visibility.
+  const [showSettings, setShowSettings] = useState(false);
+
+  // Table centers for 4 tables (upper two shifted up by 40px)
   const tableCenters = {
     table1: { x: 400 + 112.5, y: 560 + 112.5 },
     table2: { x: 1000 + 112.5, y: 560 + 112.5 },
@@ -42,13 +45,12 @@ export function Room() {
     table4: { x: 1000 + 112.5, y: 900 + 112.5 },
   };
 
-  // Seat offsets – using 130px so chairs appear closer.
-  // We'll use the occupancy count as the seat index.
+  // Seat offsets for tables (using 130px so chairs appear closer)
   const tableSeatOffsets = [
-    { x: -130, y: 0 },   // seat index 0
-    { x: 130, y: 0 },    // seat index 1
-    { x: 0, y: -130 },   // seat index 2
-    { x: 0, y: 130 }     // seat index 3
+    { x: -130, y: 0 },
+    { x: 130, y: 0 },
+    { x: 0, y: -130 },
+    { x: 0, y: 130 }
   ];
 
   // Bar chairs positions (relative to #bar-lower)
@@ -79,12 +81,11 @@ export function Room() {
     localStorage.setItem("chatMessages", JSON.stringify(chatMessages));
   }, [chatMessages]);
 
-  // Save player position to localStorage whenever it changes.
+  // Persist player position.
   useEffect(() => {
     localStorage.setItem("playerPos", JSON.stringify(playerPos));
   }, [playerPos]);
 
-  // Chat form handler.
   const handleChatSubmit = (e) => {
     e.preventDefault();
     if (chatInput.trim() !== "") {
@@ -98,7 +99,7 @@ export function Room() {
   const containerRef = useRef(null);
   const roomRef = useRef(null);
 
-  // When the player moves (via arrow keys) and is seated, free the seat.
+  // When the player moves via arrow keys and is seated, free their seat.
   useEffect(() => {
     if (heldKeys.current.length > 0 && currentSeat !== null) {
       if (currentSeat.type === "table") {
@@ -113,7 +114,7 @@ export function Room() {
     }
   }, [heldKeys.current.length, currentSeat]);
 
-  // Keyboard event listeners
+  // Keyboard event listeners.
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
@@ -149,7 +150,7 @@ export function Room() {
         return { x, y };
       });
 
-      // Clamp player position within the room (1500 x 1200).
+      // Clamp position within the room (1500 x 1200)
       setPlayerPos(prev => ({
         x: Math.max(0, Math.min(prev.x, 1500 - 40)),
         y: Math.max(0, Math.min(prev.y, 1200 - 40))
@@ -174,13 +175,10 @@ export function Room() {
 
   // Function to seat at a table.
   const sitAtTable = (tableId) => {
-    // If already seated at the same table, do nothing.
     if (currentSeat && currentSeat.type === "table" && currentSeat.id === tableId) {
       return;
     }
-    // Only seat if there's an available seat.
     if (tableOccupancy[tableId] < 4) {
-      // Free previous seat if necessary.
       if (currentSeat) {
         if (currentSeat.type === "table" && currentSeat.id !== tableId) {
           setTableOccupancy(prev => ({
@@ -208,7 +206,6 @@ export function Room() {
 
   // Function to seat at the bar.
   const sitAtBar = () => {
-    // If already seated at the bar, do nothing.
     if (currentSeat && currentSeat.type === "bar") {
       return;
     }
@@ -244,8 +241,63 @@ export function Room() {
           <img src="images/final coin.png" alt="Coin" className="gold-icon" />
           <span>: 1,000,000</span>
         </div>
-        <div id="settings-button"></div>
+        {/* Settings button toggles the overlay */}
+        <div 
+          id="settings-button" 
+          onClick={() => setShowSettings(true)}
+          style={{ cursor: "pointer" }}
+        >
+        </div>
       </header>
+
+      {/* Settings Modal Overlay */}
+      {showSettings && (
+        <div 
+          id="settings-modal" 
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            backgroundColor: "rgba(0,0,0,0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000
+          }}
+          onClick={() => setShowSettings(false)}
+        >
+          <div 
+            style={{
+              backgroundColor: "rgba(0,0,0,0.8)",
+              padding: "20px",
+              borderRadius: "8px",
+              color: "white",
+              textAlign: "center"
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2>Change Your Color</h2>
+            <input 
+              type="range" 
+              min="0" 
+              max="360" 
+              value={playerColorHue}
+              onChange={(e) => setPlayerColorHue(e.target.value)}
+            />
+            <div style={{ marginTop: "10px" }}>
+              Current Color: <span style={{ color: playerColor }}>{playerColor}</span>
+            </div>
+            <button 
+              onClick={() => setShowSettings(false)}
+              style={{ marginTop: "10px", padding: "5px 10px", cursor: "pointer" }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Viewport container */}
       <div id="room-container" ref={containerRef} style={{ transform: "scale(1.08)" }}>
@@ -271,8 +323,7 @@ export function Room() {
             <img src="/images/michalagnelo.jpg" alt="Picture 2" />
           </div>
 
-          {/* Four tables arranged in a centered square formation.
-              Upper two tables moved up by 40px (top now 560px). */}
+          {/* Four tables arranged in a centered square formation (upper two moved up by 40px) */}
           <div 
             onClick={() => sitAtTable("table1")}
             style={{ position: "absolute", left: "400px", top: "560px", cursor: "pointer" }}>
@@ -315,8 +366,8 @@ export function Room() {
           {/* Render the Bartender */}
           <Bartender onBuyDrink={() => alert("You bought a drink!")} />
 
-          {/* Render the Player */}
-          <Player position={playerPos} loginName={loginName} />
+          {/* Render the Player (pass dynamic color) */}
+          <Player position={playerPos} loginName={loginName} color={playerColor} />
         </div>
       </div>
 
@@ -338,7 +389,12 @@ export function Room() {
           <div id="chat-messages">
             {chatMessages.map((msg, idx) => (
               <div key={idx}>
-                <strong>{msg.from}:</strong> {msg.text}
+                {msg.from === loginName ? (
+                  <strong style={{ color: playerColor }}>{msg.from}:</strong>
+                ) : (
+                  <strong>{msg.from}:</strong>
+                )}{" "}
+                <span style={{ color: "white" }}>{msg.text}</span>
               </div>
             ))}
           </div>
