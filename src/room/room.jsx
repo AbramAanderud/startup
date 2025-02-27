@@ -25,37 +25,33 @@ export function Room() {
   // Bar occupancy for 10 seats
   const [barOccupancy, setBarOccupancy] = useState(0);
 
-  // Define table center positions (for 4 tables)
+  // Define table center positions for 4 tables shifted 100px higher.
+  // For example, table1's container top changes from 700px to 600px.
   const tableCenters = {
-    table1: { x: 400 + 112.5, y: 700 + 112.5 },
-    table2: { x: 1000 + 112.5, y: 700 + 112.5 },
-    table3: { x: 400 + 112.5, y: 1000 + 112.5 },
-    table4: { x: 1000 + 112.5, y: 1000 + 112.5 },
+    table1: { x: 400 + 112.5, y: 600 + 112.5 },
+    table2: { x: 1000 + 112.5, y: 600 + 112.5 },
+    table3: { x: 400 + 112.5, y: 900 + 112.5 },
+    table4: { x: 1000 + 112.5, y: 900 + 112.5 },
   };
-  
 
-  // For a table of 225px diameter (radius ≈112.5) and a chair of 75px (half =37.5),
-  // the ideal offset is 112.5 + 37.5 = 150. Use these for the four seats.
+  // Adjust table seat offsets to bring chairs closer to the tables.
+  // For instance, using 130 instead of 150 moves them 20px closer.
   const tableSeatOffsets = [
-    { x: -150, y: 0 },   // left seat
-    { x: 150, y: 0 },    // right seat
-    { x: 0, y: -150 },   // top seat (appears above table)
-    { x: 0, y: 150 }     // bottom seat (appears below table)
+    { x: -130, y: 0 },   // left seat
+    { x: 130, y: 0 },    // right seat
+    { x: 0, y: -130 },   // top seat
+    { x: 0, y: 130 }     // bottom seat
   ];
 
+  // Bar chairs remain unchanged.
   const barChairCount = 10;
-  // These values are based on your room dimensions:
   const barLowerWidth = 1350;  // 90% of 1500px room width
   const barLowerHeight = 72;   // 6% of 1200px room height
-  // Compute positions relative to the bar lower container
   const barChairPositions = Array.from({ length: barChairCount }, (_, i) => {
-    // Evenly space the chairs across the width. Adjust for the chair's width (75px).
     const x = ((i + 1) * barLowerWidth) / (barChairCount + 1) - (75 / 2);
-    // Align vertically. You might choose to center them or align at the bottom.
-    const y = (barLowerHeight - 75) / 2;  // centers the 75px chair vertically in a 72px tall container; tweak if needed.
+    const y = (barLowerHeight - 75) / 2;  // centers the 75px chair vertically
     return { x, y };
   });
-
 
   // Refs for viewport container and room (world)
   const containerRef = useRef(null);
@@ -120,7 +116,6 @@ export function Room() {
   }, [playerPos]);
 
   // When clicking a table, seat the player at the next available seat.
-  // Chairs are now positioned immediately adjacent to the table.
   const sitAtTable = (tableId) => {
     setTableOccupancy(prev => {
       const current = prev[tableId];
@@ -144,8 +139,7 @@ export function Room() {
     setBarOccupancy(prev => {
       const index = prev % barChairPositions.length;
       const seatPos = barChairPositions[index];
-      // Place the player exactly at the chair position (or adjust slightly if needed)
-      const barLowerOffset = { x: 75, y: 324 }; // Adjust if your room dimensions change.
+      const barLowerOffset = { x: 75, y: 324 }; // as defined earlier
       setPlayerPos({
         x: barLowerOffset.x + seatPos.x,
         y: barLowerOffset.y + seatPos.y
@@ -194,25 +188,25 @@ export function Room() {
             <img src="/images/michalagnelo.jpg" alt="Picture 2" />
           </div>
 
-          {/* Four tables arranged in a centered square formation */}
+          {/* Four tables arranged in a centered square formation, shifted 100px up */}
           <div 
             onClick={() => sitAtTable("table1")}
-            style={{ position: "absolute", left: "400px", top: "700px", cursor: "pointer" }}>
+            style={{ position: "absolute", left: "400px", top: "600px", cursor: "pointer" }}>
             <Table id="table1" occupancy={tableOccupancy.table1} maxOccupancy={4} />
           </div>
           <div 
             onClick={() => sitAtTable("table2")}
-            style={{ position: "absolute", left: "1000px", top: "700px", cursor: "pointer" }}>
+            style={{ position: "absolute", left: "1000px", top: "600px", cursor: "pointer" }}>
             <Table id="table2" occupancy={tableOccupancy.table2} maxOccupancy={4} />
           </div>
           <div 
             onClick={() => sitAtTable("table3")}
-            style={{ position: "absolute", left: "400px", top: "1000px", cursor: "pointer" }}>
+            style={{ position: "absolute", left: "400px", top: "900px", cursor: "pointer" }}>
             <Table id="table3" occupancy={tableOccupancy.table3} maxOccupancy={4} />
           </div>
           <div 
             onClick={() => sitAtTable("table4")}
-            style={{ position: "absolute", left: "1000px", top: "1000px", cursor: "pointer" }}>
+            style={{ position: "absolute", left: "1000px", top: "900px", cursor: "pointer" }}>
             <Table id="table4" occupancy={tableOccupancy.table4} maxOccupancy={4} />
           </div>
 
@@ -234,7 +228,7 @@ export function Room() {
             })
           )}
 
-          {/* Render the Bartender (assumed to be behind the bar) */}
+          {/* Render the Bartender */}
           <Bartender onBuyDrink={() => alert("You bought a drink!")} />
 
           {/* Render the Player */}
@@ -245,9 +239,9 @@ export function Room() {
       <div 
         id="chat-box"
         style={{
-          height: chatCollapsed ? "50px" : "30%",       // When collapsed, use a smaller height (e.g., 50px)
-          minHeight: chatCollapsed ? "50px" : "200px",    // Adjust the minimum height accordingly
-          transition: "height 0.3s ease"                 // Optional: add a smooth transition
+          height: chatCollapsed ? "50px" : "30%",
+          minHeight: chatCollapsed ? "50px" : "200px",
+          transition: "height 0.3s ease"
         }}
       >
         <button 
@@ -265,7 +259,6 @@ export function Room() {
           <button type="submit">Chat</button>
         </form>
       </div>
-
     </main>
   );
 }
