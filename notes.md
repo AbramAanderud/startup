@@ -52,3 +52,5 @@ Accept: text/html
 - need to change the port to 4000 on my backend
 - you can create console logs so that debugging is eassier, you can even pass in retrieved variables to be printed by the logs. 
 - will my calls to console log effect my final site? 
+- Need to have some initial data or it will crash my componeents. 
+

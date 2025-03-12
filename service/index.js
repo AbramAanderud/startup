@@ -10,7 +10,9 @@ app.use(express.json());
 app.use(cookieParser());
 
 let users = [];
-let userData = {}; // Store user-specific data
+let userData = {}; 
+let globalChat = [];
+
 const authCookieName = 'authToken';
 
 let apiRouter = express.Router();
@@ -41,6 +43,9 @@ function setAuthCookie(res, authToken) {
     });
 }
 
+
+
+
 // Middleware
 const verifyAuth = async (req, res, next) => {
     const user = await findUser('token', req.cookies[authCookieName]);
@@ -51,6 +56,19 @@ const verifyAuth = async (req, res, next) => {
     }
 };
 
+
+// GET global chat messages
+apiRouter.get('/chat', (req, res) => {
+  res.send(globalChat);
+});
+
+// POST a new chat message
+apiRouter.post('/chat', (req, res) => {
+  const message = req.body; // Expecting { from: ..., text: ... }
+  globalChat.push(message);
+  res.send(message);
+});
+
 // Endpoints
 apiRouter.post('/auth/create', async (req, res) => {
     if (await findUser('email', req.body.email)) {
@@ -59,7 +77,7 @@ apiRouter.post('/auth/create', async (req, res) => {
     } else {
         const user = await createUser(req.body.email, req.body.password);
         setAuthCookie(res, user.token);
-        userData[user.email] = { gold: 0, colors: 'hsl(0, 100%, 50%)', chat: [] }; 
+        userData[user.email] = { gold: 0, color: 'hsl(0, 100%, 50%)', chat: [] }; 
         res.send({ email: user.email });
     }
 });
@@ -92,7 +110,7 @@ apiRouter.get('/user/data', verifyAuth, (req, res) => {
     const user = findUser('token', req.cookies[authCookieName]);
     if (user) {
       if (!userData[user.email]) {
-        userData[user.email] = { gold: 0, colors: 'hsl(0, 100%, 50%)', chat: [] };
+        userData[user.email] = { gold: 0, color: 'hsl(0, 100%, 50%)', chat: [] };
       }
       res.send(userData[user.email]);
     } else {
