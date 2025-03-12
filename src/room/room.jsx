@@ -1,26 +1,25 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Player from './player';
 import Chair from './chair';
 import Table from './table';
 import Bartender from './bartender';
 import '../app.css';
 
-export function Room({ userName: initialUserName }) {
-  // For authentication, we still get the userName from localStorage or props.
-  const loginName = initialUserName || localStorage.getItem("loginName") || "Player";
+export function Room({ userName: propUserName }) {
+  const navigate = useNavigate();
+  // Use the userName passed in (or from localStorage as fallback)
+  const loginName = propUserName || localStorage.getItem("loginName") || "Player";
 
-  // roomData holds backend-synced data for the current user.
-  // We assume the backend returns an object like: { gold, color, chat }
+  // Dynamic backend data: gold, color, chat.
   const [roomData, setRoomData] = useState({
     gold: 0,
     color: 'hsl(0, 100%, 50%)',
     chat: [],
   });
-  // For simplicity, we keep gold and color separate from UI state in this example.
   const { gold, color, chat } = roomData;
 
-  // Local UI state for static room layout and reactivity.
+  // Local UI state (for movement, seating, etc.)
   const [playerPos, setPlayerPos] = useState(() => {
     const saved = localStorage.getItem("playerPos");
     return saved ? JSON.parse(saved) : { x: 750, y: 500 };
@@ -35,69 +34,64 @@ export function Room({ userName: initialUserName }) {
   });
   const [barOccupancy, setBarOccupancy] = useState(0);
   const [currentSeat, setCurrentSeat] = useState(null);
+  // For settings, we allow the user to change their color locally;
+  // changes will be sent to the backend via an effect.
   const [playerColorHue, setPlayerColorHue] = useState(0);
-  // We now derive the displayed player color from the backend value (color)
-  // You could sync changes in playerColorHue to the backend.
+  // Displayed color comes from backend data.
   const playerColor = color;
   const [showSettings, setShowSettings] = useState(false);
 
-  // For chat UI: local state and collapsible chat.
+  // Chat-related local state (for UI, then synced globally)
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
   const [chatCollapsed, setChatCollapsed] = useState(false);
   const [drinkPopups, setDrinkPopups] = useState([]);
   const [chatPopups, setChatPopups] = useState([]);
 
-  // Refs for panning logic.
+  // Refs for container panning and chat input.
   const containerRef = useRef(null);
   const roomRef = useRef(null);
   const chatInputRef = useRef(null);
 
-  // On mount, fetch the user's room data from the backend.
+  // On mount, fetch the current user's room data from the backend.
   useEffect(() => {
     fetch('/api/user/data')
-      .then((res) => res.json())
-      .then((data) => {
-        // If no data exists, the backend should return defaults.
+      .then(res => res.json())
+      .then(data => {
+        // Expect data: { gold, color, chat } – if missing, backend should initialize defaults.
         setRoomData(data);
       })
-      .catch((err) => console.error("Failed to fetch room data:", err));
+      .catch(err => console.error("Failed to fetch room data:", err));
   }, []);
 
-  // Poll the global chat messages every 5 seconds.
+  // Poll backend to update gold every 5 seconds.
+  // Use an empty dependency array so this effect runs once.
   useEffect(() => {
     const intervalId = setInterval(() => {
-      fetch('/api/chat')
-        .then((res) => res.json())
-        .then((globalChat) => {
-          setChatMessages(globalChat);
+      // Use the updater function so we reference previous state.
+      setRoomData(prev => {
+        const updated = { ...prev, gold: prev.gold + 10 };
+        // Update backend.
+        fetch('/api/user/data', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updated),
         })
-        .catch((err) => console.error("Failed to fetch global chat:", err));
+          .then(res => res.json())
+          .then(data => {
+            // Use the backend response to update state.
+            setRoomData(data);
+          })
+          .catch(err => console.error("Failed to update gold:", err));
+        return updated;
+      });
     }, 5000);
     return () => clearInterval(intervalId);
   }, []);
 
-  // Every 5 seconds, update gold in the backend.
+  // When playerColorHue changes, update backend color.
   useEffect(() => {
-    const intervalId = setInterval(() => {
-      const updated = { ...roomData, gold: roomData.gold + 10 };
-      fetch('/api/user/data', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updated),
-      })
-        .then((res) => res.json())
-        .then((data) => setRoomData(data))
-        .catch((err) => console.error("Failed to update gold:", err));
-    }, 5000);
-    return () => clearInterval(intervalId);
-  }, [roomData]);
-
-  // Optionally, you can add an effect to sync changes in color.
-  useEffect(() => {
-    // When playerColorHue changes, update the backend color.
     const newColor = `hsl(${playerColorHue}, 100%, 50%)`;
-    // Only update if different from current backend color.
     if (newColor !== roomData.color) {
       const updated = { ...roomData, color: newColor };
       fetch('/api/user/data', {
@@ -105,41 +99,26 @@ export function Room({ userName: initialUserName }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updated),
       })
-        .then((res) => res.json())
-        .then((data) => setRoomData(data))
-        .catch((err) => console.error("Failed to update color:", err));
+        .then(res => res.json())
+        .then(data => setRoomData(data))
+        .catch(err => console.error("Failed to update color:", err));
     }
-  }, [playerColorHue, roomData]);
+  }, [playerColorHue]); // only depends on playerColorHue
 
-  // When a user sends a chat message, post it to the global chat endpoint.
-  const handleChatSubmit = (e) => {
-    e.preventDefault();
-    if (chatInput.trim() !== "") {
-      const newMsg = { from: loginName, text: chatInput.trim() };
-      fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newMsg),
-      })
-        .then((res) => res.json())
-        .then(() => {
-          // Optionally, clear the input or force a chat poll update.
-          setChatInput("");
+  // Poll global chat messages every 5 seconds.
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      fetch('/api/chat')
+        .then(res => res.json())
+        .then(globalChat => {
+          setChatMessages(globalChat);
         })
-        .catch((err) => console.error("Failed to post chat message:", err));
-      // Also show a temporary popup.
-      const id = Date.now();
-      const popup = { id, text: chatInput.trim(), pos: { x: playerPos.x, y: playerPos.y - 20 } };
-      setChatPopups((prev) => [...prev, popup]);
-      setTimeout(() => {
-        setChatPopups((prev) => prev.filter((p) => p.id !== id));
-      }, 5000);
-  
-      chatInputRef.current && chatInputRef.current.blur();
-    }
-  };
+        .catch(err => console.error("Failed to fetch global chat:", err));
+    }, 5000);
+    return () => clearInterval(intervalId);
+  }, []);
 
-  // Save playerPos locally.
+  // Save playerPos to localStorage.
   useEffect(() => {
     localStorage.setItem("playerPos", JSON.stringify(playerPos));
   }, [playerPos]);
@@ -148,7 +127,7 @@ export function Room({ userName: initialUserName }) {
   useEffect(() => {
     let frameId;
     const update = () => {
-      setPlayerPos((prev) => {
+      setPlayerPos(prev => {
         let { x, y } = prev;
         const key = heldKeys.current[0];
         if (key === "ArrowUp") y -= speed;
@@ -157,7 +136,7 @@ export function Room({ userName: initialUserName }) {
         if (key === "ArrowRight") x += speed;
         return { x, y };
       });
-      setPlayerPos((prev) => ({
+      setPlayerPos(prev => ({
         x: Math.max(0, Math.min(prev.x, 1500 - 40)),
         y: Math.max(0, Math.min(prev.y, 1200 - 40))
       }));
@@ -178,7 +157,7 @@ export function Room({ userName: initialUserName }) {
     return () => cancelAnimationFrame(frameId);
   }, [playerPos]);
 
-  // Key handling to drive movement.
+  // Key handling for movement.
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
@@ -200,7 +179,7 @@ export function Room({ userName: initialUserName }) {
     };
   }, []);
 
-  // Seating logic remains largely the same.
+  // Seating logic (unchanged from before).
   const tableCenters = {
     table1: { x: 512.5, y: 672.5 },
     table2: { x: 1112.5, y: 672.5 },
@@ -259,13 +238,12 @@ export function Room({ userName: initialUserName }) {
     }
   };
 
-  // For buying a drink, update gold in both local state and backend.
+  // For buying a drink, update gold locally and then update the backend.
   const handleBuyDrink = () => {
     if (gold >= 5) {
-      const updated = gold - 5;
-      setGold(updated);
-      // Also update backend for gold.
-      const updatedData = { ...roomData, gold: updated };
+      const updatedGold = gold - 5;
+      setGold(updatedGold);
+      const updatedData = { ...roomData, gold: updatedGold };
       fetch('/api/user/data', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
