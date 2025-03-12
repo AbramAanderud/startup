@@ -48,5 +48,7 @@ Testing and adding new note...
 Host: info.cern.ch
 Accept: text/html
 - If fetch is unspecified it defaults to GET
-- 
+- Need to have server up first
+- need to change the port to 4000 on my backend
+- you can create console logs so that debugging is eassier, you can even pass in retrieved variables to be printed by the logs. 
 
