@@ -41,4 +41,11 @@ Testing and adding new note...
 - Can use local storage to store sessions
 - Can use authstate to store app components
 - Can make it so you exit out of chat box after chatting instead of having to click
+- URL's can be instances even for gaming 
+- URL parameters represent a list of key value pairs
+- Port is the specified number that the connection is located on. Lower port numbers than 600 are reserved for common internet protocols, higher numnerw are used for anything
+- HTTP requests are formatted GET /hypertext/WWW/Helping.html HTTP/1.1
+Host: info.cern.ch
+Accept: text/html
+- 
 
