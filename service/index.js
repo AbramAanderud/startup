@@ -88,15 +88,18 @@ apiRouter.delete('/auth/logout', async (req, res) => {
 });
 
 
-// User Data Endpoint
 apiRouter.get('/user/data', verifyAuth, (req, res) => {
     const user = findUser('token', req.cookies[authCookieName]);
-    if (user && userData[user.email]) {
-        res.send(userData[user.email]);
+    if (user) {
+      if (!userData[user.email]) {
+        userData[user.email] = { gold: 0, colors: 'hsl(0, 100%, 50%)', chat: [] };
+      }
+      res.send(userData[user.email]);
     } else {
-        res.status(404).send({ msg: 'User data not found' });
+      res.status(404).send({ msg: 'User data not found' });
     }
-});
+  });
+  
 
 apiRouter.post('/user/data', verifyAuth, (req, res) => {
     const user = findUser('token', req.cookies[authCookieName]);
