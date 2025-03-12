@@ -6,37 +6,63 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './app.css';
 import { AuthState } from './login/authState';
 
+// Simple ErrorBoundary to catch render errors in children.
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error("ErrorBoundary caught an error:", error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) {
+      return <div>Error: {this.state.error && this.state.error.toString()}</div>;
+    }
+    return this.props.children;
+  }
+}
+
 export default function App() {
-  const [userName, setUserName] = useState(localStorage.getItem('userName') || '');
+  // Retrieve loginName from localStorage.
+  const [userName, setUserName] = useState(localStorage.getItem('loginName') || '');
   const currentAuthState = userName ? AuthState.Authenticated : AuthState.Unauthenticated;
   const [authState, setAuthState] = useState(currentAuthState);
+
+  // Debug log to confirm App is rendering.
+  console.log("App rendering. userName =", userName, "authState =", authState.name);
 
   return (
     <BrowserRouter>
       <div>
         <header>
+          <h2>Header (App component)</h2>
         </header>
-        <Routes>
-          <Route
-            path='/'
-            element={
-              <Login
-                userName={userName}
-                authState={authState}
-                onAuthChange={(user, newState) => {
-                  setUserName(user);
-                  setAuthState(newState);
-                }}
-              />
-            }
-          />
-          <Route path='/room' element={<Room userName={userName} />} />
-          <Route path='*' element={<NotFound />} />
-        </Routes>
+        <ErrorBoundary>
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <Login
+                  userName={userName}
+                  authState={authState}
+                  onAuthChange={(user, newState) => {
+                    console.log("onAuthChange called with", user, newState);
+                    setUserName(user);
+                    setAuthState(newState);
+                  }}
+                />
+              }
+            />
+            <Route path="/room" element={<Room userName={userName} />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </ErrorBoundary>
         <footer>
-          <span className="text-reset">
-            Abram Aanderud github link:
-          </span>
+          <span className="text-reset">Abram Aanderud github link:</span>
           <a href="https://github.com/AbramAanderud/startup">GitHub</a>
         </footer>
       </div>
