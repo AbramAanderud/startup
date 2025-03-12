@@ -24,17 +24,27 @@ export function Unauthenticated(props) {
         body: JSON.stringify({ email: userName, password: password }),
         headers: { 'Content-type': 'application/json; charset=UTF-8' },
       });
-      if (response?.status === 200) {
+      console.log("Response status:", response.status);
+      const text = await response.text();
+      console.log("Response text:", text);
+      let body;
+      try {
+        body = JSON.parse(text);
+      } catch (e) {
+        body = {};
+      }
+      if (response.status === 200) {
         localStorage.setItem('userName', userName);
         props.onLogin(userName);
       } else {
-        const body = await response.json();
-        setDisplayError(`⚠ Error: ${body.msg}`);
+        setDisplayError(`⚠ Error: ${body.msg || "Unknown error"}`);
       }
     } catch (err) {
+      console.error("Fetch error:", err);
       setDisplayError("⚠ Error: Could not reach server");
     }
   }
+  
 
   return (
     <form>
