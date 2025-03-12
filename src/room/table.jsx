@@ -21,7 +21,6 @@ export default function Table({ id, occupancy, maxOccupancy }) {
         color: "white",
         fontSize: "18px",
         zIndex: 10,
-        position: "relative"
       }}
     >
       {occupancy}/{maxOccupancy}
