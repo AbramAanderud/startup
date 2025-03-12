@@ -47,5 +47,6 @@ Testing and adding new note...
 - HTTP requests are formatted GET /hypertext/WWW/Helping.html HTTP/1.1
 Host: info.cern.ch
 Accept: text/html
+- If fetch is unspecified it defaults to GET
 - 
 
