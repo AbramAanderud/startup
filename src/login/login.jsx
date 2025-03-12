@@ -5,7 +5,7 @@ import './login.css';
 export function Login() {
     const navigate = useNavigate();
     const [email, setEmail] = useState("");
-    const [password, setPassword] = useState(""); // Add password state
+    const [password, setPassword] = useState(""); 
 
     const handleSubmit = async (e, isCreate) => {
         e.preventDefault();
