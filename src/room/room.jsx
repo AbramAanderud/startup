@@ -121,18 +121,13 @@ export function Room({ userName: propUserName }) {
         .then(data => {
           console.log("Polled user data:", data);
           setRoomData(data);
-  
-          setPlayerPos(prev => {
-            if (JSON.stringify(prev) !== JSON.stringify(data.position)) {
-              return data.position || { x: 750, y: 500 };
-            }
-            return prev;
-          });
+          // Do not update playerPos here; let the 2-second updater handle it.
         })
         .catch(err => console.error("Failed to poll user data:", err));
     }, 10000);
     return () => clearInterval(dataInterval);
   }, []);
+   
   
 
   // --------------------
