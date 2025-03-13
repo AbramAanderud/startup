@@ -53,4 +53,6 @@ Accept: text/html
 - you can create console logs so that debugging is eassier, you can even pass in retrieved variables to be printed by the logs. 
 - will my calls to console log effect my final site? 
 - Need to have some initial data or it will crash my componeents. 
+- It can be really helpful to inspect on the html to debug, fixed an issue pretty easily that I was wasting time on
+
 
