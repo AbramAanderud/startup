@@ -17,7 +17,7 @@ export function Room({ userName: propUserName }) {
     position: { x: 750, y: 500 },
     chat: []
   });
-  const { gold, color, position, chat } = roomData;
+  const { gold, color, position } = roomData;
 
   // Local state for movement.
   const [playerPos, setPlayerPos] = useState(position);
@@ -31,26 +31,26 @@ export function Room({ userName: propUserName }) {
   });
   const [barOccupancy, setBarOccupancy] = useState(0);
   const [currentSeat, setCurrentSeat] = useState(null);
-  // For local color control (if desired), but display uses backend value.
+  // For local color control if needed; the displayed color comes from backend.
   const [playerColorHue, setPlayerColorHue] = useState(0);
   const playerColor = color;
   const [showSettings, setShowSettings] = useState(false);
 
-  // Chat-related local state.
+  // Chat-related state.
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
   const [chatCollapsed, setChatCollapsed] = useState(false);
   const [drinkPopups, setDrinkPopups] = useState([]);
   const [chatPopups, setChatPopups] = useState([]);
 
-  // New state: list of all players in the room.
+  // Global players list.
   const [players, setPlayers] = useState([]);
 
   const containerRef = useRef(null);
   const roomRef = useRef(null);
   const chatInputRef = useRef(null);
 
-  // Seating layout data (static).
+  // Static seating layout.
   const tableCenters = {
     table1: { x: 512.5, y: 672.5 },
     table2: { x: 1112.5, y: 672.5 },
@@ -64,7 +64,7 @@ export function Room({ userName: propUserName }) {
     { x: 0, y: 130 }
   ];
 
-  // Define constants for the bar chairs.
+  // Bar chair constants.
   const barChairCount = 10;
   const barLowerWidth = 1350;
   const barLowerHeight = 72;
@@ -74,8 +74,7 @@ export function Room({ userName: propUserName }) {
     return { x, y };
   });
 
-
-  // On mount, fetch current user data.
+  // Fetch current user data on mount.
   useEffect(() => {
     fetch('/api/user/data')
       .then(res => res.json())
@@ -222,15 +221,12 @@ export function Room({ userName: propUserName }) {
         setTableOccupancy(prev => ({ ...prev, [currentSeat.id]: Math.max(prev[currentSeat.id] - 1, 0) }));
       }
       const seatIndex = barOccupancy;
-      const barChairCount = 10;
-      const barLowerWidth = 1350;
-      const barLowerHeight = 72;
-      const barChairPositions = Array.from({ length: barChairCount }, (_, i) => {
+      const barChairPositionsLocal = Array.from({ length: barChairCount }, (_, i) => {
         const x = ((i + 1) * barLowerWidth) / (barChairCount + 1) - 75 / 2;
         const y = (barLowerHeight - 75) / 2;
         return { x, y };
       });
-      const seatPos = barChairPositions[seatIndex];
+      const seatPos = barChairPositionsLocal[seatIndex];
       const barLowerOffset = { x: 75, y: 324 };
       setBarOccupancy(prev => prev + 1);
       setCurrentSeat({ type: "bar", seatIndex });
@@ -394,9 +390,9 @@ export function Room({ userName: propUserName }) {
           <Bartender onBuyDrink={handleBuyDrink} />
           {/* Render current user */}
           <Player position={playerPos} loginName={loginName} color={playerColor} />
-          {/* Render other players globally */}
+          {/* Render other players (if any) */}
           {players.map(p => {
-            if (p.email === loginName) return null; // Skip self if desired
+            if (p.email === loginName) return null; // Skip self
             return (
               <Player 
                 key={p.email} 

@@ -9,6 +9,7 @@ const port = process.argv.length > 2 ? process.argv[2] : 3000;
 app.use(express.json());
 app.use(cookieParser());
 
+// In‑memory storage (stubbed; later replace with a DB)
 let users = [];
 let userData = {}; 
 let globalChat = [];
@@ -40,14 +41,14 @@ async function findUser(field, value) {
 
 function setAuthCookie(res, authToken) {
   res.cookie(authCookieName, authToken, {
-    secure: false, // Set to true in production (HTTPS)
+    secure: false, // set to true in production (HTTPS)
     httpOnly: true,
     sameSite: 'strict',
   });
   console.log("Set auth cookie:", authToken);
 }
 
-// Middleware
+// Middleware to verify authentication
 const verifyAuth = async (req, res, next) => {
   console.log("verifyAuth: cookies =", req.cookies);
   const user = await findUser('token', req.cookies[authCookieName]);
@@ -73,7 +74,7 @@ apiRouter.post('/chat', (req, res) => {
   res.send(message);
 });
 
-// --- Auth Endpoints ---
+// --- Authentication Endpoints ---
 apiRouter.post('/auth/create', async (req, res) => {
   console.log("POST /api/auth/create called with body:", req.body);
   if (await findUser('email', req.body.email)) {
@@ -102,6 +103,7 @@ apiRouter.post('/auth/login', async (req, res) => {
       user.token = uuid.v4();
       setAuthCookie(res, user.token);
       console.log("Login successful for:", user.email);
+      // Ensure that userData exists.
       if (!userData[user.email]) {
         userData[user.email] = { gold: 0, color: 'hsl(0, 100%, 50%)', chat: [], position: { x: 750, y: 500 } };
         console.log("Initialized userData on login for", user.email);
@@ -153,8 +155,8 @@ apiRouter.post('/user/data', verifyAuth, (req, res) => {
   }
 });
 
-// --- New: Global Room Players Endpoint ---
-// Returns an array of all players' data (their email and associated data).
+// --- Global Room Players Endpoint ---
+// Returns an array of all players’ data (their email and associated data).
 apiRouter.get('/room/players', (req, res) => {
   console.log("GET /api/room/players called");
   const players = Object.keys(userData).map(email => ({
@@ -171,7 +173,7 @@ app.use(function (err, req, res, next) {
   res.status(500).send({ type: err.name, message: err.message });
 });
 
-// Static Files
+// Serve static files from the public directory.
 app.use(express.static('public'));
 
 app.listen(port, () => {
