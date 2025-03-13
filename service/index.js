@@ -8,6 +8,13 @@ const port = process.argv.length > 2 ? process.argv[2] : 4000;
 
 app.use(express.json());
 app.use(cookieParser());
+const axios = require('axios');
+
+const weatherApiKey = process.env.OPENWEATHER_API_KEY || 'e4dff81e964fadc0bff6842957203b73'; 
+const city = 'Provo,US';
+
+const weatherManUsername = 'Weather Man';
+
 
 let users = [];
 let userData = {}; 
@@ -15,6 +22,7 @@ let globalChat = [];
 
 const authCookieName = 'authToken';
 app.use(express.static('public'));
+
 
 let apiRouter = express.Router();
 app.use('/api', apiRouter);
@@ -92,6 +100,20 @@ apiRouter.post('/auth/create', async (req, res) => {
     res.send({ email: user.email });
   }
 });
+
+async function fetchWeatherForecast() {
+    try {
+      const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${weatherApiKey}&units=metric`;
+      const response = await axios.get(url);
+      const data = response.data;
+      // Create a forecast message. You can customize the message format.
+      const forecastMessage = `Forecast for ${data.name}: ${data.weather[0].description} with a temperature of ${data.main.temp}°C.`;
+      return forecastMessage;
+    } catch (err) {
+      console.error('Error fetching weather forecast:', err);
+      return null;
+    }
+  }
 
 apiRouter.post('/auth/login', async (req, res) => {
   console.log("POST /api/auth/login called with body:", req.body);
@@ -202,6 +224,15 @@ setInterval(() => {
     }
   }
 }, 5000);
+
+setInterval(async () => {
+    const messageText = await fetchWeatherForecast();
+    if (messageText) {
+      const chatMessage = { from: weatherManUsername, text: messageText };
+      globalChat.push(chatMessage);
+      console.log('Weather forecast message added to chat:', chatMessage);
+    }
+  }, 1800000);
   
 app.use(function (err, req, res, next) {
   console.error("Error middleware caught error:", err);
