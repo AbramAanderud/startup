@@ -7,7 +7,7 @@ import Bartender from './bartender';
 import '../app.css';
 
 export function Room({ userName: propUserName }) {
-  const loginName = propUserName || localStorage.getItem("loginName") || "Player";
+  const loginName = propUserName || "Player";
   console.log("Room component rendering for:", loginName);
 
   const [roomData, setRoomData] = useState({
