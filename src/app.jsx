@@ -26,7 +26,7 @@ class ErrorBoundary extends React.Component {
 }
 
 export default function App() {
-  const [userName, setUserName] = useState(localStorage.getItem('loginName') || '');
+  const [userName, setUserName] = useState('');
   const currentAuthState = userName ? AuthState.Authenticated : AuthState.Unauthenticated;
   const [authState, setAuthState] = useState(currentAuthState);
 

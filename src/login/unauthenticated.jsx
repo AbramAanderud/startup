@@ -34,7 +34,6 @@ export function Unauthenticated(props) {
         body = {};
       }
       if (response.status === 200) {
-        localStorage.setItem('userName', userName);
         props.onLogin(userName);
       } else {
         setDisplayError(`⚠ Error: ${body.msg || "Unknown error"}`);
