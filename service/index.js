@@ -41,14 +41,13 @@ async function findUser(field, value) {
 
 function setAuthCookie(res, authToken) {
   res.cookie(authCookieName, authToken, {
-    secure: false, // Set to true in production with HTTPS
+    secure: false, 
     httpOnly: true,
     sameSite: 'strict',
   });
   console.log("Set auth cookie:", authToken);
 }
 
-// Middleware: verify authentication
 const verifyAuth = async (req, res, next) => {
   console.log("verifyAuth: cookies =", req.cookies);
   const user = await findUser('token', req.cookies[authCookieName]);
@@ -61,14 +60,13 @@ const verifyAuth = async (req, res, next) => {
   }
 };
 
-// --- Global Chat Endpoints ---
 apiRouter.get('/chat', (req, res) => {
   console.log("GET /api/chat called");
   res.send(globalChat);
 });
 
 apiRouter.post('/chat', (req, res) => {
-  const message = req.body; // Expecting { from, text }
+  const message = req.body; 
   console.log("POST /api/chat received message:", message);
   globalChat.push(message);
   res.send(message);
@@ -83,7 +81,6 @@ apiRouter.post('/auth/create', async (req, res) => {
   } else {
     const user = await createUser(req.body.email, req.body.password);
     setAuthCookie(res, user.token);
-    // Initialize default data for new user.
     userData[user.email] = { 
       gold: 0, 
       color: 'hsl(0, 100%, 50%)', 
@@ -101,12 +98,10 @@ apiRouter.post('/auth/login', async (req, res) => {
   const user = await findUser('email', req.body.email);
   if (user) {
     if (await bcrypt.compare(req.body.password, user.password)) {
-      // Generate a new token and set the auth cookie.
       user.token = uuid.v4();
       setAuthCookie(res, user.token);
       console.log("Login successful for:", user.email);
       
-      // Only initialize userData if it hasn't been set already.
       if (!userData[user.email]) {
         userData[user.email] = { 
           gold: 0, 
@@ -117,7 +112,6 @@ apiRouter.post('/auth/login', async (req, res) => {
         };
         console.log("Initialized userData on login for", user.email);
       } else {
-        // Preserve existing data and mark as logged in.
         userData[user.email].loggedIn = true;
         console.log("Using existing userData for", user.email);
       }
@@ -144,7 +138,6 @@ apiRouter.delete('/auth/logout', async (req, res) => {
   res.status(204).end();
 });
 
-// GET user data: return the stored userData.
 apiRouter.get('/user/data', verifyAuth, async (req, res) => {
   console.log("GET /api/user/data called");
   const user = await findUser('token', req.cookies[authCookieName]);
@@ -163,7 +156,6 @@ apiRouter.get('/user/data', verifyAuth, async (req, res) => {
   }
 });
   
-// POST user data: merge only provided fields.
 apiRouter.post('/user/data', verifyAuth, async (req, res) => {
   console.log("POST /api/user/data called with body:", req.body);
   const user = await findUser('token', req.cookies[authCookieName]);
@@ -171,7 +163,6 @@ apiRouter.post('/user/data', verifyAuth, async (req, res) => {
     const currentData = userData[user.email] || {};
     const newData = { ...currentData };
 
-    // Only update provided fields.
     if (req.body.hasOwnProperty('color')) {
       newData.color = req.body.color;
     }
@@ -185,7 +176,6 @@ apiRouter.post('/user/data', verifyAuth, async (req, res) => {
       newData.position = req.body.position;
     }
 
-    // Preserve other fields (like loggedIn).
     userData[user.email] = newData;
     console.log("Updated userData for", user.email, "to:", newData);
     res.send(newData);
@@ -194,7 +184,6 @@ apiRouter.post('/user/data', verifyAuth, async (req, res) => {
   }
 });
   
-// --- Global Room Players Endpoint ---
 apiRouter.get('/room/players', (req, res) => {
   console.log("GET /api/room/players called");
   const players = Object.keys(userData).map(email => ({
@@ -205,17 +194,15 @@ apiRouter.get('/room/players', (req, res) => {
   res.send(players);
 });
 
-// Passive Gold Increase: Increment gold only for logged-in users.
 setInterval(() => {
   for (const email in userData) {
     if (userData.hasOwnProperty(email) && userData[email].loggedIn) {
-      userData[email].gold += 10; // Increase gold by 10 every 5 seconds.
+      userData[email].gold += 10; 
       console.log(`Updated gold for ${email}: ${userData[email].gold}`);
     }
   }
 }, 5000);
   
-// Error Handling Middleware
 app.use(function (err, req, res, next) {
   console.error("Error middleware caught error:", err);
   res.status(500).send({ type: err.name, message: err.message });
