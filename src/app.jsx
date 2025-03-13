@@ -6,7 +6,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './app.css';
 import { AuthState } from './login/authState';
 
-// Simple ErrorBoundary to catch render errors in children.
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
@@ -27,19 +26,16 @@ class ErrorBoundary extends React.Component {
 }
 
 export default function App() {
-  // Retrieve loginName from localStorage.
   const [userName, setUserName] = useState(localStorage.getItem('loginName') || '');
   const currentAuthState = userName ? AuthState.Authenticated : AuthState.Unauthenticated;
   const [authState, setAuthState] = useState(currentAuthState);
 
-  // Debug log to confirm App is rendering.
   console.log("App rendering. userName =", userName, "authState =", authState.name);
 
   return (
     <BrowserRouter>
       <div>
         <header>
-          <h2>Header (App component)</h2>
         </header>
         <ErrorBoundary>
           <Routes>

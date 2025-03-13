@@ -10,7 +10,6 @@ export function Room({ userName: propUserName }) {
   const loginName = propUserName || localStorage.getItem("loginName") || "Player";
   console.log("Room component rendering for:", loginName);
 
-  // Backend-synced per-user data.
   const [roomData, setRoomData] = useState({
     gold: 0,
     color: 'hsl(0, 100%, 50%)',
@@ -19,12 +18,10 @@ export function Room({ userName: propUserName }) {
   });
   const { gold, color, position } = roomData;
 
-  // Local state for movement.
   const [playerPos, setPlayerPos] = useState(position);
   const heldKeys = useRef([]);
   const speed = 6;
 
-  // Local state for seating (not yet stored on backend).
   const [tableOccupancy, setTableOccupancy] = useState({
     table1: 0,
     table2: 0,
@@ -34,28 +31,22 @@ export function Room({ userName: propUserName }) {
   const [barOccupancy, setBarOccupancy] = useState(0);
   const [currentSeat, setCurrentSeat] = useState(null);
 
-  // For local color control, but display uses backend value.
   const [playerColorHue, setPlayerColorHue] = useState(0);
   const playerColor = color;
   const [showSettings, setShowSettings] = useState(false);
 
-  // Chat-related state.
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
   const [chatCollapsed, setChatCollapsed] = useState(false);
   const [drinkPopups, setDrinkPopups] = useState([]);
-  // **Ensure chatPopups is defined**
   const [chatPopups, setChatPopups] = useState([]);
 
-  // Global players list.
   const [players, setPlayers] = useState([]);
 
-  // Refs for container panning and chat input.
   const containerRef = useRef(null);
   const roomRef = useRef(null);
   const chatInputRef = useRef(null);
 
-  // Static seating layout.
   const tableCenters = {
     table1: { x: 512.5, y: 672.5 },
     table2: { x: 1112.5, y: 672.5 },
@@ -69,7 +60,6 @@ export function Room({ userName: propUserName }) {
     { x: 0, y: 130 }
   ];
 
-  // Bar chairs constants.
   const barChairCount = 10;
   const barLowerWidth = 1350;
   const barLowerHeight = 72;

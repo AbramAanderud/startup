@@ -9,7 +9,6 @@ const port = process.argv.length > 2 ? process.argv[2] : 3000;
 app.use(express.json());
 app.use(cookieParser());
 
-// In‑memory storage (stubbed; later replace with a DB)
 let users = [];
 let userData = {}; 
 let globalChat = [];
@@ -19,7 +18,6 @@ const authCookieName = 'authToken';
 let apiRouter = express.Router();
 app.use(`/api`, apiRouter);
 
-// Helper Functions
 async function createUser(email, password) {
   const passwordHash = await bcrypt.hash(password, 10);
   const user = {
@@ -41,14 +39,13 @@ async function findUser(field, value) {
 
 function setAuthCookie(res, authToken) {
   res.cookie(authCookieName, authToken, {
-    secure: false, // set to true in production (HTTPS)
+    secure: false, 
     httpOnly: true,
     sameSite: 'strict',
   });
   console.log("Set auth cookie:", authToken);
 }
 
-// Middleware to verify authentication
 const verifyAuth = async (req, res, next) => {
   console.log("verifyAuth: cookies =", req.cookies);
   const user = await findUser('token', req.cookies[authCookieName]);
@@ -68,7 +65,7 @@ apiRouter.get('/chat', (req, res) => {
 });
 
 apiRouter.post('/chat', (req, res) => {
-  const message = req.body; // Expecting { from: ..., text: ... }
+  const message = req.body; 
   console.log("POST /api/chat received message:", message);
   globalChat.push(message);
   res.send(message);
@@ -83,12 +80,11 @@ apiRouter.post('/auth/create', async (req, res) => {
   } else {
     const user = await createUser(req.body.email, req.body.password);
     setAuthCookie(res, user.token);
-    // Initialize default data for new user.
+    
     userData[user.email] = { 
       gold: 0, 
       color: 'hsl(0, 100%, 50%)', 
       chat: [],
-      position: { x: 750, y: 500 }  // default starting position
     };
     console.log("Initialized userData for", user.email, ":", userData[user.email]);
     res.send({ email: user.email });
@@ -103,7 +99,6 @@ apiRouter.post('/auth/login', async (req, res) => {
       user.token = uuid.v4();
       setAuthCookie(res, user.token);
       console.log("Login successful for:", user.email);
-      // Ensure that userData exists.
       if (!userData[user.email]) {
         userData[user.email] = { gold: 0, color: 'hsl(0, 100%, 50%)', chat: [], position: { x: 750, y: 500 } };
         console.log("Initialized userData on login for", user.email);
@@ -127,7 +122,6 @@ apiRouter.delete('/auth/logout', async (req, res) => {
   res.status(204).end();
 });
 
-// --- User Data Endpoints ---
 apiRouter.get('/user/data', verifyAuth, (req, res) => {
   console.log("GET /api/user/data called");
   const user = findUser('token', req.cookies[authCookieName]);
@@ -147,7 +141,7 @@ apiRouter.post('/user/data', verifyAuth, (req, res) => {
   console.log("POST /api/user/data called with body:", req.body);
   const user = findUser('token', req.cookies[authCookieName]);
   if (user && userData[user.email]) {
-    userData[user.email] = req.body; // Update user data
+    userData[user.email] = req.body; 
     console.log("Updated userData for", user.email, "to:", userData[user.email]);
     res.send(userData[user.email]);
   } else {
@@ -167,13 +161,11 @@ apiRouter.get('/room/players', (req, res) => {
   res.send(players);
 });
 
-// Error Handling
 app.use(function (err, req, res, next) {
   console.error("Error middleware caught error:", err);
   res.status(500).send({ type: err.name, message: err.message });
 });
 
-// Serve static files from the public directory.
 app.use(express.static('public'));
 
 app.listen(port, () => {
