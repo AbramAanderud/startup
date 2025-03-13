@@ -10,6 +10,7 @@ export function Room({ userName: propUserName }) {
   const loginName = propUserName || localStorage.getItem("loginName") || "Player";
   console.log("Room component rendering for:", loginName);
 
+  // Per–user data from backend.
   const [roomData, setRoomData] = useState({
     gold: 0,
     color: 'hsl(0, 100%, 50%)',
@@ -18,10 +19,12 @@ export function Room({ userName: propUserName }) {
   });
   const { gold, color, position } = roomData;
 
+  // Local state for movement.
   const [playerPos, setPlayerPos] = useState(position);
   const heldKeys = useRef([]);
   const speed = 6;
 
+  // Local seating state.
   const [tableOccupancy, setTableOccupancy] = useState({
     table1: 0,
     table2: 0,
@@ -31,22 +34,27 @@ export function Room({ userName: propUserName }) {
   const [barOccupancy, setBarOccupancy] = useState(0);
   const [currentSeat, setCurrentSeat] = useState(null);
 
+  // Use the backend color value.
   const [playerColorHue, setPlayerColorHue] = useState(0);
   const playerColor = color;
   const [showSettings, setShowSettings] = useState(false);
 
+  // Chat state.
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
   const [chatCollapsed, setChatCollapsed] = useState(false);
   const [drinkPopups, setDrinkPopups] = useState([]);
   const [chatPopups, setChatPopups] = useState([]);
 
+  // Global players list.
   const [players, setPlayers] = useState([]);
 
+  // Refs for container panning and chat input.
   const containerRef = useRef(null);
   const roomRef = useRef(null);
   const chatInputRef = useRef(null);
 
+  // Static seating layout.
   const tableCenters = {
     table1: { x: 512.5, y: 672.5 },
     table2: { x: 1112.5, y: 672.5 },
@@ -60,6 +68,7 @@ export function Room({ userName: propUserName }) {
     { x: 0, y: 130 }
   ];
 
+  // Bar chairs constants.
   const barChairCount = 10;
   const barLowerWidth = 1350;
   const barLowerHeight = 72;
@@ -112,36 +121,29 @@ export function Room({ userName: propUserName }) {
     return () => clearInterval(playersInterval);
   }, []);
 
+  // --------------------
+  // Poll user data every 10 seconds.
   useEffect(() => {
-    const goldInterval = setInterval(() => {
-      setRoomData(prev => {
-        const updatedGold = prev.gold + 10;
-        const updatedData = { ...prev, gold: updatedGold };
-        console.log("Attempting to update gold to:", updatedGold);
-        fetch('/api/user/data', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(updatedData)
+    const dataInterval = setInterval(() => {
+      fetch('/api/user/data')
+        .then(res => res.json())
+        .then(data => {
+          console.log("Polled user data:", data);
+          setRoomData(data);
+          setPlayerPos(data.position || { x: 750, y: 500 });
         })
-          .then(res => res.json())
-          .then(data => {
-            console.log("Gold updated from backend:", data.gold);
-            return data;
-          })
-          .then(newData => setRoomData(newData))
-          .catch(err => console.error("Failed to update gold:", err));
-        return updatedData;
-      });
-    }, 5000);
-    return () => clearInterval(goldInterval);
+        .catch(err => console.error("Failed to poll user data:", err));
+    }, 10000);
+    return () => clearInterval(dataInterval);
   }, []);
-  
+
   // --------------------
   // Update backend color when playerColorHue changes.
   useEffect(() => {
     const newColor = `hsl(${playerColorHue}, 100%, 50%)`;
     if (newColor !== roomData.color) {
-      const updatedData = { ...roomData, color: newColor };
+      // Only update the color field so other fields remain intact.
+      const updatedData = { color: newColor };
       fetch('/api/user/data', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -150,28 +152,32 @@ export function Room({ userName: propUserName }) {
         .then(res => res.json())
         .then(data => {
           console.log("Color updated:", data.color);
-          setRoomData(data);
+          setRoomData(prev => ({ ...prev, color: data.color }));
         })
         .catch(err => console.error("Failed to update color:", err));
     }
-  }, [playerColorHue, roomData]);
+  }, [playerColorHue, roomData.color]);
 
   // --------------------
-  // Update backend when playerPos changes.
+  // New: Update backend with current player position periodically.
   useEffect(() => {
-    const updatedData = { ...roomData, position: playerPos };
-    fetch('/api/user/data', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updatedData)
-    })
-      .then(res => res.json())
-      .then(data => {
-        console.log("Position updated:", data.position);
-        setRoomData(data);
+    const updatePosition = () => {
+      const updatedData = { position: playerPos };
+      fetch('/api/user/data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedData)
       })
-      .catch(err => console.error("Failed to update position:", err));
-  }, [playerPos, roomData]);
+        .then(res => res.json())
+        .then(data => {
+          console.log("Position updated:", data.position);
+        })
+        .catch(err => console.error("Failed to update position:", err));
+    };
+
+    const intervalId = setInterval(updatePosition, 2000); // update every 2 seconds
+    return () => clearInterval(intervalId);
+  }, [playerPos]);
 
   // --------------------
   // Movement and camera panning logic.
@@ -286,11 +292,11 @@ export function Room({ userName: propUserName }) {
   };
 
   // --------------------
-  // Handle buying a drink: update gold on backend.
+  // Handle buying a drink: deduct 5 gold and update backend.
   const handleBuyDrink = () => {
     if (gold >= 5) {
       const updatedGold = gold - 5;
-      const updatedData = { ...roomData, gold: updatedGold };
+      const updatedData = { gold: updatedGold };
       fetch('/api/user/data', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -299,7 +305,7 @@ export function Room({ userName: propUserName }) {
         .then(res => res.json())
         .then(data => {
           console.log("Gold after buying drink:", data.gold);
-          setRoomData(data);
+          setRoomData(prev => ({ ...prev, gold: data.gold }));
         })
         .catch(err => console.error("Failed to update gold after drink:", err));
       const id = Date.now();
