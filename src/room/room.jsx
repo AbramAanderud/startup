@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import Player from './player';
 import Chair from './chair';
 import Table from './table';
@@ -7,13 +7,10 @@ import Bartender from './bartender';
 import '../app.css';
 
 export function Room({ userName: propUserName }) {
-  const navigate = useNavigate();
   const loginName = propUserName || localStorage.getItem("loginName") || "Player";
-
-  // Log at component start
   console.log("Room component rendering for:", loginName);
 
-  // Dynamic backend data: gold, color, chat, position.
+  // Backend-synced per-user data.
   const [roomData, setRoomData] = useState({
     gold: 0,
     color: 'hsl(0, 100%, 50%)',
@@ -22,7 +19,7 @@ export function Room({ userName: propUserName }) {
   });
   const { gold, color, position, chat } = roomData;
 
-  // Local UI state for movement, seating, etc.
+  // Local state for movement.
   const [playerPos, setPlayerPos] = useState(position);
   const heldKeys = useRef([]);
   const speed = 6;
@@ -34,23 +31,51 @@ export function Room({ userName: propUserName }) {
   });
   const [barOccupancy, setBarOccupancy] = useState(0);
   const [currentSeat, setCurrentSeat] = useState(null);
+  // For local color control (if desired), but display uses backend value.
   const [playerColorHue, setPlayerColorHue] = useState(0);
-  // Displayed color comes from backend.
   const playerColor = color;
   const [showSettings, setShowSettings] = useState(false);
 
-  // Chat-related state.
+  // Chat-related local state.
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
   const [chatCollapsed, setChatCollapsed] = useState(false);
   const [drinkPopups, setDrinkPopups] = useState([]);
   const [chatPopups, setChatPopups] = useState([]);
 
+  // New state: list of all players in the room.
+  const [players, setPlayers] = useState([]);
+
   const containerRef = useRef(null);
   const roomRef = useRef(null);
   const chatInputRef = useRef(null);
 
-  // Fetch user data on mount.
+  // Seating layout data (static).
+  const tableCenters = {
+    table1: { x: 512.5, y: 672.5 },
+    table2: { x: 1112.5, y: 672.5 },
+    table3: { x: 512.5, y: 1012.5 },
+    table4: { x: 1112.5, y: 1012.5 },
+  };
+  const tableSeatOffsets = [
+    { x: -130, y: 0 },
+    { x: 130, y: 0 },
+    { x: 0, y: -115 },
+    { x: 0, y: 130 }
+  ];
+
+  // Define constants for the bar chairs.
+  const barChairCount = 10;
+  const barLowerWidth = 1350;
+  const barLowerHeight = 72;
+  const barChairPositions = Array.from({ length: barChairCount }, (_, i) => {
+    const x = ((i + 1) * barLowerWidth) / (barChairCount + 1) - (75 / 2);
+    const y = (barLowerHeight - 75) / 2;
+    return { x, y };
+  });
+
+
+  // On mount, fetch current user data.
   useEffect(() => {
     fetch('/api/user/data')
       .then(res => res.json())
@@ -64,7 +89,7 @@ export function Room({ userName: propUserName }) {
 
   // Poll global chat messages every 5 seconds.
   useEffect(() => {
-    const intervalId = setInterval(() => {
+    const chatInterval = setInterval(() => {
       fetch('/api/chat')
         .then(res => res.json())
         .then(globalChat => {
@@ -73,7 +98,21 @@ export function Room({ userName: propUserName }) {
         })
         .catch(err => console.error("Failed to fetch global chat:", err));
     }, 5000);
-    return () => clearInterval(intervalId);
+    return () => clearInterval(chatInterval);
+  }, []);
+
+  // Poll global players list every 3 seconds.
+  useEffect(() => {
+    const playersInterval = setInterval(() => {
+      fetch('/api/room/players')
+        .then(res => res.json())
+        .then(allPlayers => {
+          console.log("Fetched all players:", allPlayers);
+          setPlayers(allPlayers);
+        })
+        .catch(err => console.error("Failed to fetch players:", err));
+    }, 3000);
+    return () => clearInterval(playersInterval);
   }, []);
 
   // Update backend when playerPos changes.
@@ -149,19 +188,7 @@ export function Room({ userName: propUserName }) {
     };
   }, []);
 
-  // Seating logic (unchanged).
-  const tableCenters = {
-    table1: { x: 512.5, y: 672.5 },
-    table2: { x: 1112.5, y: 672.5 },
-    table3: { x: 512.5, y: 1012.5 },
-    table4: { x: 1112.5, y: 1012.5 },
-  };
-  const tableSeatOffsets = [
-    { x: -130, y: 0 },
-    { x: 130, y: 0 },
-    { x: 0, y: -115 },
-    { x: 0, y: 130 }
-  ];
+  // Seating logic.
   const sitAtTable = (tableId) => {
     if (currentSeat && currentSeat.type === "table" && currentSeat.id === tableId) return;
     if (tableOccupancy[tableId] < 4) {
@@ -256,14 +283,12 @@ export function Room({ userName: propUserName }) {
         .then(res => res.json())
         .then(() => setChatInput(""))
         .catch(err => console.error("Failed to post chat message:", err));
-  
       const id = Date.now();
       const popup = { id, text: chatInput.trim(), pos: { x: playerPos.x, y: playerPos.y - 20 } };
       setChatPopups(prev => [...prev, popup]);
       setTimeout(() => {
         setChatPopups(prev => prev.filter(p => p.id !== id));
       }, 5000);
-  
       chatInputRef.current && chatInputRef.current.blur();
     }
   };
@@ -367,7 +392,20 @@ export function Room({ userName: propUserName }) {
             })
           )}
           <Bartender onBuyDrink={handleBuyDrink} />
+          {/* Render current user */}
           <Player position={playerPos} loginName={loginName} color={playerColor} />
+          {/* Render other players globally */}
+          {players.map(p => {
+            if (p.email === loginName) return null; // Skip self if desired
+            return (
+              <Player 
+                key={p.email} 
+                position={p.position || { x: 750, y: 500 }} 
+                loginName={p.email} 
+                color={p.color} 
+              />
+            );
+          })}
         </div>
       </div>
       <div id="chat-box" style={{ height: chatCollapsed ? "50px" : "30%", minHeight: chatCollapsed ? "50px" : "200px", transition:"height 0.3s ease", display:"flex", flexDirection:"column" }}>
