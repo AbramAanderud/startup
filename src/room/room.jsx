@@ -121,12 +121,19 @@ export function Room({ userName: propUserName }) {
         .then(data => {
           console.log("Polled user data:", data);
           setRoomData(data);
-          setPlayerPos(data.position || { x: 750, y: 500 });
+  
+          setPlayerPos(prev => {
+            if (JSON.stringify(prev) !== JSON.stringify(data.position)) {
+              return data.position || { x: 750, y: 500 };
+            }
+            return prev;
+          });
         })
         .catch(err => console.error("Failed to poll user data:", err));
     }, 10000);
     return () => clearInterval(dataInterval);
   }, []);
+  
 
   // --------------------
   // Update backend color when playerColorHue changes.
@@ -287,7 +294,10 @@ export function Room({ userName: propUserName }) {
   const handleBuyDrink = () => {
     if (gold >= 5) {
       const updatedGold = gold - 5;
-      const updatedData = { gold: updatedGold };
+      const updatedData = { 
+        gold: updatedGold,
+        position: playerPos 
+      };
       fetch('/api/user/data', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

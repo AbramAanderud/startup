@@ -119,7 +119,7 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 - [x] **Static middleware for frontend** - express.static('public') is indeed configured in my code. 
 - [x] **Calls to third party endpoints** - Calling OpenWeatherMap API for weather forecasts which are then sent to the global chat under the name weather man every 15 minutes. 
 - [x] **Backend service endpoints** - Made endpoints for auth and login like in simon code but also made endpoints for user data that contains the users gold, color, current position in the room, and if they are logged in or not (for gold increment logic). I also made a global chat endpoint and an endpoint for all users currently in the room. 
-- [x] **Frontend calls service endpoints** - All of my React components are calling from the back end using fetch. Specifically the userName, gold, color, status, and position (userData). 
+- [x] **Frontend calls service endpoints** - All of my React components are calling from the backend using fetch. Specifically the userName, gold, color, status, and position (userData). 
 
 ## 🚀 DB/Login deliverable
 
