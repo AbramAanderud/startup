@@ -3,13 +3,14 @@ const cookieParser = require('cookie-parser');
 const bcrypt = require('bcryptjs');
 const uuid = require('uuid');
 const axios = require('axios');
-const config = require('./config'); 
-const DB = require('./database');
 const path = require('path');
+const DB = require('./database');
 
 const app = express();
 const port = process.argv.length > 2 ? process.argv[2] : 4000;
 const authCookieName = 'authToken';
+const axios = require('axios');
+const weatherApiKey = 'fd27f7c81722bf5997bc6fa6ca24327';
 const city = 'Provo,US';
 const weatherManUsername = 'Weather Man';
 
@@ -22,7 +23,7 @@ app.use('/api', apiRouter);
 
 function setAuthCookie(res, authToken) {
   res.cookie(authCookieName, authToken, {
-    secure: false,
+    secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
     sameSite: 'strict',
   });
@@ -120,9 +121,8 @@ apiRouter.post('/chat', (req, res) => {
 
 // --- WEATHER ---
 async function fetchWeatherForecast() {
-  if (!config.weatherApiKey) return null;
   try {
-    const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${config.weatherApiKey}&units=metric`;
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${weatherApiKey}&units=metric`;
     const response = await axios.get(url);
     const data = response.data;
     return `Forecast for ${data.name}: ${data.weather[0].description} with a temperature of ${data.main.temp}°C.`;
@@ -142,7 +142,7 @@ setInterval(async () => {
     const chatMessage = { from: weatherManUsername, text: forecast };
     globalChat.push(chatMessage);
   }
-}, 1800000);
+}, 180000);
 
 // --- Error Handling ---
 app.use(function (err, req, res, next) {
@@ -150,7 +150,15 @@ app.use(function (err, req, res, next) {
   res.status(500).send({ type: err.name, message: err.message });
 });
 
-const httpService = app.listen(port, () => {
-  console.log(`Listening on port ${port}`);
+// --- Catch-all for SPA ---
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// --- Start server AFTER DB connects ---
+DB.connectToDb().then(() => {
+  app.listen(port, '0.0.0.0', () => {
+    console.log(`Listening on port ${port}`);
+  });
+   
+});

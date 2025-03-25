@@ -3,22 +3,22 @@ const config = require('./dbConfig.json');
 
 const url = `mongodb+srv://${config.userName}:${config.password}@${config.hostname}`;
 const client = new MongoClient(url);
-const dbName = 'chatterpad'; 
-const db = client.db(dbName);
+const dbName = 'chatterpad';
 
-const userCollection = db.collection('users');
-const userDataCollection = db.collection('userdata');
+let db, userCollection, userDataCollection;
 
-(async function connectToDb() {
+async function connectToDb() {
   try {
     await client.connect();
-    await db.command({ ping: 1 });
+    db = client.db(dbName);
+    userCollection = db.collection('users');
+    userDataCollection = db.collection('userdata');
     console.log(`Connected to MongoDB: ${config.hostname}`);
   } catch (err) {
     console.error(`DB connection error: ${err.message}`);
     process.exit(1);
   }
-})();
+}
 
 // USER FUNCTIONS
 async function getUser(email) {
@@ -46,7 +46,7 @@ async function updateUserData(email, data) {
   await userDataCollection.updateOne(
     { email },
     { $set: data },
-    { upsert: true } 
+    { upsert: true }
   );
 }
 
@@ -62,6 +62,7 @@ async function updateGoldForAllLoggedInUsers(amount) {
 }
 
 module.exports = {
+  connectToDb,
   getUser,
   getUserByToken,
   addUser,
@@ -69,5 +70,5 @@ module.exports = {
   getUserData,
   updateUserData,
   getAllUserData,
-  updateGoldForAllLoggedInUsers
+  updateGoldForAllLoggedInUsers,
 };

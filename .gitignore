@@ -1,6 +1,4 @@
 .vscode/
 .DS_Store
 node_modules
-
 dbConfig.json
-config.js
