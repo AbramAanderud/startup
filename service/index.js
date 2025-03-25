@@ -9,7 +9,7 @@ const DB = require('./database');
 const app = express();
 const port = process.argv[2] || 4000;
 const authCookieName = 'authToken';
-const weatherApiKey = 'fd27f7c81722bf5997bc6fa6ca24327';
+const weatherApiKey = 'fd27f7c81722bf5997bc6fa6ca24327d';
 const city = 'Provo,US';
 const weatherManUsername = 'Weather Man';
 
