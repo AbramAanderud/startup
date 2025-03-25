@@ -129,7 +129,7 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 - [x] **User login and logout** - Log in and log out working
 - [x] **Stores data in MongoDB** - Can see the users in the database
 - [x] **Stores credentials in MongoDB** - Stored userData is accurate and visable in the database
-- [ ] **Restricts functionality based on authentication** - I did not complete this part of the deliverable.
+- [x] **Restricts functionality based on authentication** - Cannot join room unless you have a valid account and are logged in
 
 ## 🚀 WebSocket deliverable
 
