@@ -1,11 +1,11 @@
-// index.js
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const bcrypt = require('bcryptjs');
 const uuid = require('uuid');
 const axios = require('axios');
-const config = require('./dbConfig');
+const config = require('./config'); 
 const DB = require('./database');
+const path = require('path');
 
 const app = express();
 const port = process.argv.length > 2 ? process.argv[2] : 4000;
@@ -150,6 +150,7 @@ app.use(function (err, req, res, next) {
   res.status(500).send({ type: err.name, message: err.message });
 });
 
-app.listen(port, () => {
+const httpService = app.listen(port, () => {
   console.log(`Listening on port ${port}`);
 });
+

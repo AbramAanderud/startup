@@ -68,7 +68,7 @@ Accept: text/html
 - Some of the code on simon may need some asyncs 
 - The code pulls highscores without waiting if needed. 
 - Simon Deployed succesfully and showing up in the database
-
+- Was able to test the server with new database and is working
 
 
 
