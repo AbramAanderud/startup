@@ -56,6 +56,12 @@ Accept: text/html
 - It can be really helpful to inspect on the html to debug, fixed an issue pretty easily that I was wasting time on
 - It is completely possible to get an infinite loop with no aysnc
 - Time to start db hope its not as bad as 240 
+- Only 8 gigs by default in your server
+- You need to be smart about how you store your data so putting evreything in your db like large files such as videos is not a good idea and there is a better solution
+- Server should be copy and replacable
+- Cant do that with lots of files
+- Seems like the way to solve this is by having external dbs that are stored on the cloud and will ensure that copies are made for you. 
+
 
 
 
