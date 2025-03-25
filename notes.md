@@ -65,6 +65,10 @@ Accept: text/html
 - MongoDB is good becasue it uses collections of big arrays of JSON objects. 
 - Mongo is nice becasue it changes directly, you can just add new fields to your document and the database adapts
 - Mongo syntax for queries is simillar to javascript
+- Some of the code on simon may need some asyncs 
+- The code pulls highscores without waiting if needed. 
+- Simon Deployed succesfully and showing up in the database
+
 
 
 
