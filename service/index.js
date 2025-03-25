@@ -7,9 +7,8 @@ const path = require('path');
 const DB = require('./database');
 
 const app = express();
-const port = process.argv.length > 2 ? process.argv[2] : 4000;
+const port = process.argv[2] || 4000;
 const authCookieName = 'authToken';
-const axios = require('axios');
 const weatherApiKey = 'fd27f7c81722bf5997bc6fa6ca24327';
 const city = 'Provo,US';
 const weatherManUsername = 'Weather Man';
@@ -21,34 +20,22 @@ app.use(express.static('public'));
 const apiRouter = express.Router();
 app.use('/api', apiRouter);
 
-function setAuthCookie(res, authToken) {
-  res.cookie(authCookieName, authToken, {
-    secure: process.env.NODE_ENV === 'production',
-    httpOnly: true,
-    sameSite: 'strict',
-  });
+function setAuthCookie(res, token) {
+  res.cookie(authCookieName, token, { secure: true, httpOnly: true, sameSite: 'strict' });
 }
 
-const verifyAuth = async (req, res, next) => {
+async function verifyAuth(req, res, next) {
   const user = await DB.getUserByToken(req.cookies[authCookieName]);
-  if (user && user.email) {
-    next();
-  } else {
-    res.status(401).send({ msg: 'Unauthorized' });
-  }
-};
+  if (user) next();
+  else res.status(401).send({ msg: 'Unauthorized' });
+}
 
-// --- AUTH ---
 apiRouter.post('/auth/create', async (req, res) => {
   if (await DB.getUser(req.body.email)) {
     res.status(409).send({ msg: 'Existing user' });
   } else {
-    const passwordHash = await bcrypt.hash(req.body.password, 10);
-    const user = {
-      email: req.body.email,
-      password: passwordHash,
-      token: uuid.v4(),
-    };
+    const password = await bcrypt.hash(req.body.password, 10);
+    const user = { email: req.body.email, password, token: uuid.v4() };
     await DB.addUser(user);
     await DB.updateUserData(user.email, {
       gold: 0,
@@ -86,7 +73,6 @@ apiRouter.delete('/auth/logout', async (req, res) => {
   res.status(204).end();
 });
 
-// --- USER DATA ---
 apiRouter.get('/user/data', verifyAuth, async (req, res) => {
   const user = await DB.getUserByToken(req.cookies[authCookieName]);
   const data = await DB.getUserData(user.email);
@@ -95,10 +81,10 @@ apiRouter.get('/user/data', verifyAuth, async (req, res) => {
 
 apiRouter.post('/user/data', verifyAuth, async (req, res) => {
   const user = await DB.getUserByToken(req.cookies[authCookieName]);
-  const currentData = await DB.getUserData(user.email) || {};
-  const newData = { ...currentData, ...req.body };
-  await DB.updateUserData(user.email, newData);
-  res.send(newData);
+  const current = await DB.getUserData(user.email) || {};
+  const merged = { ...current, ...req.body };
+  await DB.updateUserData(user.email, merged);
+  res.send(merged);
 });
 
 apiRouter.get('/room/players', async (req, res) => {
@@ -106,7 +92,6 @@ apiRouter.get('/room/players', async (req, res) => {
   res.send(all);
 });
 
-// --- CHAT ---
 let globalChat = [];
 
 apiRouter.get('/chat', (req, res) => {
@@ -114,20 +99,17 @@ apiRouter.get('/chat', (req, res) => {
 });
 
 apiRouter.post('/chat', (req, res) => {
-  const message = req.body;
-  globalChat.push(message);
-  res.send(message);
+  globalChat.push(req.body);
+  res.send(req.body);
 });
 
-// --- WEATHER ---
 async function fetchWeatherForecast() {
   try {
     const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${weatherApiKey}&units=metric`;
-    const response = await axios.get(url);
-    const data = response.data;
-    return `Forecast for ${data.name}: ${data.weather[0].description} with a temperature of ${data.main.temp}°C.`;
+    const res = await axios.get(url);
+    const d = res.data;
+    return `Forecast for ${d.name}: ${d.weather[0].description} with a temperature of ${d.main.temp}°C.`;
   } catch (err) {
-    console.error('Weather fetch error:', err.message);
     return null;
   }
 }
@@ -138,27 +120,17 @@ setInterval(async () => {
 
 setInterval(async () => {
   const forecast = await fetchWeatherForecast();
-  if (forecast) {
-    const chatMessage = { from: weatherManUsername, text: forecast };
-    globalChat.push(chatMessage);
-  }
+  if (forecast) globalChat.push({ from: weatherManUsername, text: forecast });
 }, 180000);
 
-// --- Error Handling ---
-app.use(function (err, req, res, next) {
-  console.error("Error:", err);
+app.use((err, req, res, next) => {
   res.status(500).send({ type: err.name, message: err.message });
 });
 
-// --- Catch-all for SPA ---
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// --- Start server AFTER DB connects ---
-DB.connectToDb().then(() => {
-  app.listen(port, '0.0.0.0', () => {
-    console.log(`Listening on port ${port}`);
-  });
-   
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Listening on port ${port}`);
 });
