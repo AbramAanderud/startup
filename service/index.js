@@ -110,11 +110,11 @@ async function fetchWeatherForecast() {
   }
 
   try {
-    console.log("Fetching weather..."); // Debugging log
+    //console.log("Fetching weather..."); // Debugging log
     const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${weatherApiKey}&units=metric`;
     const response = await axios.get(url);
     const data = response.data;
-    console.log("Weather API response:", data); // Log the full response
+    //console.log("Weather API response:", data); // Log the full response
     return `Forecast for ${data.name}: ${data.weather[0].description} with a temperature of ${data.main.temp}°C.`;
   } catch (err) {
     console.error('Error fetching weather forecast:', err.response ? err.response.data : err.message);
