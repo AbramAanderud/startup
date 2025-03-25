@@ -55,6 +55,7 @@ Accept: text/html
 - Need to have some initial data or it will crash my componeents. 
 - It can be really helpful to inspect on the html to debug, fixed an issue pretty easily that I was wasting time on
 - It is completely possible to get an infinite loop with no aysnc
+- Time to start db hope its not as bad as 240 
 
 
 
