@@ -61,6 +61,11 @@ Accept: text/html
 - Server should be copy and replacable
 - Cant do that with lots of files
 - Seems like the way to solve this is by having external dbs that are stored on the cloud and will ensure that copies are made for you. 
+- Databases were dominated by SQL till needs got a little more specific
+- MongoDB is good becasue it uses collections of big arrays of JSON objects. 
+- Mongo is nice becasue it changes directly, you can just add new fields to your document and the database adapts
+- Mongo syntax for queries is simillar to javascript
+
 
 
 
