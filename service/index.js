@@ -2,6 +2,8 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const bcrypt = require('bcryptjs');
 const uuid = require('uuid');
+require('dotenv').config();
+console.log(process.env.OPENWEATHER_API_KEY); 
 
 const app = express();
 const port = process.argv.length > 2 ? process.argv[2] : 4000;
@@ -102,18 +104,24 @@ apiRouter.post('/auth/create', async (req, res) => {
 });
 
 async function fetchWeatherForecast() {
-    try {
-      const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${weatherApiKey}&units=metric`;
-      const response = await axios.get(url);
-      const data = response.data;
-      // Create a forecast message. You can customize the message format.
-      const forecastMessage = `Forecast for ${data.name}: ${data.weather[0].description} with a temperature of ${data.main.temp}°C.`;
-      return forecastMessage;
-    } catch (err) {
-      console.error('Error fetching weather forecast:', err);
-      return null;
-    }
+  if (!weatherApiKey || weatherApiKey === 'YOUR_DEFAULT_API_KEY') {
+    console.error('Missing or invalid OpenWeather API key.');
+    return null;
   }
+
+  try {
+    console.log("Fetching weather..."); // Debugging log
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${weatherApiKey}&units=metric`;
+    const response = await axios.get(url);
+    const data = response.data;
+    console.log("Weather API response:", data); // Log the full response
+    return `Forecast for ${data.name}: ${data.weather[0].description} with a temperature of ${data.main.temp}°C.`;
+  } catch (err) {
+    console.error('Error fetching weather forecast:', err.response ? err.response.data : err.message);
+    return null;
+  }
+}
+
 
 apiRouter.post('/auth/login', async (req, res) => {
   console.log("POST /api/auth/login called with body:", req.body);
@@ -232,7 +240,7 @@ setInterval(async () => {
       globalChat.push(chatMessage);
       console.log('Weather forecast message added to chat:', chatMessage);
     }
-  }, 1800000);
+  }, 18000);
   
 app.use(function (err, req, res, next) {
   console.error("Error middleware caught error:", err);
