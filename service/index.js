@@ -2,8 +2,9 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const bcrypt = require('bcryptjs');
 const uuid = require('uuid');
-require('dotenv').config();
-console.log(process.env.OPENWEATHER_API_KEY); 
+const config = require('./dbConfig');
+const weatherApiKey = config.weatherApiKey;
+
 
 const app = express();
 const port = process.argv.length > 2 ? process.argv[2] : 4000;
@@ -11,8 +12,6 @@ const port = process.argv.length > 2 ? process.argv[2] : 4000;
 app.use(express.json());
 app.use(cookieParser());
 const axios = require('axios');
-
-const weatherApiKey = process.env.OPENWEATHER_API_KEY || 'e4dff81e964fadc0bff6842957203b73'; 
 const city = 'Provo,US';
 
 const weatherManUsername = 'Weather Man';
@@ -240,7 +239,7 @@ setInterval(async () => {
       globalChat.push(chatMessage);
       console.log('Weather forecast message added to chat:', chatMessage);
     }
-  }, 18000);
+  }, 180000);
   
 app.use(function (err, req, res, next) {
   console.error("Error middleware caught error:", err);
