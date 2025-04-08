@@ -70,6 +70,13 @@ Accept: text/html
 - Simon Deployed succesfully and showing up in the database
 - Was able to test the server with new database and is working
 
+Notes for web sockets:
+- My website itself doesnt make sense with only a client server model. 
+- Peer to peer connection style
+- Websockets allow client and server to have an asynchronous exchange of information.
+- 
+
+
 
 
 
