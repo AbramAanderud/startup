@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom';
 import { Login } from './login/login';
-import { Room } from './room/room';
+import  Room from './room/room';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './app.css';
 import { AuthState } from './login/authState';
