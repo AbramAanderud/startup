@@ -137,6 +137,15 @@ export default function Room({ userName: propUserName }) {
     }
   };
 
+  useEffect(() => {
+  const saveBeforeUnload = () => {
+    navigator.sendBeacon('/api/user/data', JSON.stringify({ position: playerPos }));
+  };
+  window.addEventListener("beforeunload", saveBeforeUnload);
+  return () => window.removeEventListener("beforeunload", saveBeforeUnload);
+  }, [playerPos]);
+
+
   // --- Debounce for Immediate Movement Save ---
   useEffect(() => {
     if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
@@ -190,11 +199,14 @@ export default function Room({ userName: propUserName }) {
       switch (message.type) {
         case RoomEvent.Init:
           if (message.payload) {
-            setRoomData(message.payload.roomData || {});
-            setPlayers(message.payload.players || []);
-            setChatMessages(message.payload.chatMessages || []);
-            if (message.payload.roomData?.position) {
-              setPlayerPos(message.payload.roomData.position);
+            // If data already loaded, skip WS override
+            if (!loaded) {
+              setRoomData(message.payload.roomData || {});
+              setPlayers(message.payload.players || []);
+              setChatMessages(message.payload.chatMessages || []);
+              if (message.payload.roomData?.position) {
+                setPlayerPos(message.payload.roomData.position);
+              }
             }
           }
           break;
@@ -203,8 +215,18 @@ export default function Room({ userName: propUserName }) {
           break;
         case RoomEvent.Move:
           setPlayers(prev => {
-            const filtered = prev.filter(p => p.email !== message.from);
-            return [...filtered, { email: message.from, position: message.payload, color: message.color || "hsl(0, 100%, 50%)" }];
+            const existing = prev.find(p => p.email === message.from);
+            const now = Date.now();
+            const newPlayer = {
+              email: message.from,
+              fromPos: existing?.currentPos || message.payload, // start at current or jump to new
+              toPos: message.payload,
+              startTime: now,
+              duration: 120, // smoother glide
+              color: message.color || "hsl(0, 100%, 50%)"
+            };
+            const others = prev.filter(p => p.email !== message.from);
+            return [...others, newPlayer];
           });
           break;
         case RoomEvent.ColorChange:
@@ -378,6 +400,20 @@ export default function Room({ userName: propUserName }) {
     }
   };
 
+  const handleExit = () => {
+    fetch('/api/auth/logout', {
+      method: 'DELETE',
+      credentials: 'include'
+    })
+      .then(() => {
+        navigate('/');
+      })
+      .catch(err => {
+        console.error('Logout error:', err);
+        navigate('/');
+      });
+  };
+
   const handleBuyDrink = () => {
     if (gold >= 5) {
       fetch('/api/user/data', {
@@ -415,9 +451,11 @@ export default function Room({ userName: propUserName }) {
         payload: { text: trimmedMessage, color: playerColor },
         timestamp: new Date().toISOString()
       };
-      // Immediately update local chat state.
-      setChatMessages(prev => [...prev, messageObject]);
+      
+      // Do NOT update chatMessages here.
+      
       sendRoomEvent(RoomEvent.Chat, messageObject.payload);
+      
       fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -430,6 +468,7 @@ export default function Room({ userName: propUserName }) {
       setChatInput("");
     }
   };
+  
 
   return (
     <main>
@@ -595,10 +634,18 @@ export default function Room({ userName: propUserName }) {
           <Player position={playerPos} loginName={username} color={playerColor} />
           {players.map(p => {
             if (p.email === username) return null;
+
+            const now = Date.now();
+            const elapsed = now - p.startTime;
+            const t = Math.min(1, elapsed / p.duration);
+
+            const x = p.fromPos.x + (p.toPos.x - p.fromPos.x) * t;
+            const y = p.fromPos.y + (p.toPos.y - p.fromPos.y) * t;
+
             return (
               <Player
                 key={p.email}
-                position={p.position || { x: 750, y: 500 }}
+                position={{ x, y }}
                 loginName={p.email}
                 color={p.color}
               />
