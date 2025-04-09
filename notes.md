@@ -78,7 +78,7 @@ Notes for web sockets:
 - need an on connection callback, then you can send and recieve messages
 - Can write some code to send things through the chrome debugger to look at the console logs
 - Gives code to make a simple chat bot in the specs goes through the whole process
-
+- ping ponging will keep the server alive
 
 
 
