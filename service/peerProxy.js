@@ -8,14 +8,13 @@ function peerProxy(httpServer) {
     socket.isAlive = true;
     
     socket.on('message', (data) => {
-      // Optionally, you can parse data here if you want to
-      // and add additional processing
-      socketServer.clients.forEach((client) => {
-        if (client !== socket && client.readyState === client.OPEN) {
-          client.send(data);
-        }
-      });
+        socketServer.clients.forEach((client) => {
+          if (client.readyState === WebSocket.OPEN) {
+            client.send(data);
+          }
+        });
     });
+      
     
     socket.on('pong', () => {
       socket.isAlive = true;

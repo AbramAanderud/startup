@@ -6,7 +6,7 @@ const uuid = require('uuid');
 const axios = require('axios');
 const path = require('path');
 const DB = require('./database');
-const { peerProxy } = require('./peerProxy'); // New: import the WebSocket module
+const { peerProxy } = require('./peerProxy'); // WebSocket module
 
 const app = express();
 const port = process.argv[2] || 4000;
@@ -43,7 +43,9 @@ apiRouter.post('/auth/create', async (req, res) => {
     const password = await bcrypt.hash(req.body.password, 10);
     const user = { email: req.body.email, password, token: uuid.v4() };
     await DB.addUser(user);
+    // Ensure userData includes the email so that we have the username
     await DB.updateUserData(user.email, {
+      email: user.email,
       gold: 0,
       color: 'hsl(0, 100%, 50%)',
       chat: [],
@@ -52,6 +54,15 @@ apiRouter.post('/auth/create', async (req, res) => {
     });
     setAuthCookie(res, user.token);
     res.send({ email: user.email });
+  }
+});
+
+apiRouter.get('/leaderboard', async (req, res) => {
+  try {
+    const topUsers = await DB.getTopGoldUsers(5);
+    res.send(topUsers);
+  } catch (err) {
+    res.status(500).send({ error: 'Failed to load leaderboard.' });
   }
 });
 
@@ -102,18 +113,25 @@ apiRouter.get('/room/players', async (req, res) => {
   res.send(all);
 });
 
-let globalChat = [];
-apiRouter.get('/chat', (req, res) => {
-  res.send(globalChat);
+apiRouter.get('/chat', async (req, res) => {
+  try {
+    const chats = await DB.getAllChatMessages();
+    res.send(chats);
+  } catch (err) {
+    res.status(500).send({ error: 'Failed to load chat messages.' });
+  }
 });
 
-apiRouter.post('/chat', (req, res) => {
-  globalChat.push(req.body);
-  res.send(req.body);
+apiRouter.post('/chat', async (req, res) => {
+  try {
+    const result = await DB.addChatMessage(req.body);
+    // Depending on your MongoDB driver version, adjust to return the inserted document.
+    res.send(result.ops ? result.ops[0] : req.body);
+  } catch (err) {
+    res.status(500).send({ error: 'Failed to persist chat message.' });
+  }
 });
 
-// -------------------
-// Weather Updates (simulate system events)
 async function fetchWeatherForecast() {
   try {
     const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${weatherApiKey}&units=metric`;
@@ -131,24 +149,21 @@ setInterval(async () => {
 
 setInterval(async () => {
   const forecast = await fetchWeatherForecast();
-  if (forecast) globalChat.push({ from: weatherManUsername, text: forecast });
+  if (forecast) {
+    // Optional: you could store system messages into the chat collection if desired.
+  }
 }, 180000);
 
-// Global error handler.
 app.use((err, req, res, next) => {
   res.status(500).send({ type: err.name, message: err.message });
 });
 
-// Serve index.html for any unknown routes.
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// -------------------
-// Start HTTP Server and Attach WebSocket Server
 const httpServer = app.listen(port, '0.0.0.0', () => {
   console.log(`Listening on port ${port}`);
 });
 
-// Attach the WebSocket server to the same HTTP server.
 peerProxy(httpServer);

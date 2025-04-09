@@ -5,9 +5,9 @@ import Player from './player';
 import Chair from './chair';
 import Table from './table';
 import Bartender from './bartender';
+import { Leaderboard } from './leaderboard';
 import '../app.css';
 
-// Define room event types for consistency.
 export const RoomEvent = {
   Chat: 'chat',
   Move: 'move',
@@ -18,18 +18,21 @@ export const RoomEvent = {
   BuyDrink: 'buyDrink'
 };
 
-// Helper to extract the hue value from an HSL string, e.g. "hsl(120, 100%, 50%)"
 function extractHue(hslString) {
   const match = hslString.match(/hsl\(\s*([\d.]+),/);
   return match ? Number(match[1]) : 0;
 }
 
 export default function Room({ userName: propUserName }) {
-  const loginName = propUserName || "Player";
   const navigate = useNavigate();
-  console.log("Room component rendering for:", loginName);
 
-  // Persisted room data from the DB (with default values as fallback).
+  // We'll store the username from persisted data here.
+  const [username, setUsername] = useState(""); 
+
+  // Loading flag until data is fetched.
+  const [loaded, setLoaded] = useState(false);
+
+  // Persisted room data from the database.
   const [roomData, setRoomData] = useState({
     gold: 0,
     color: 'hsl(0, 100%, 50%)',
@@ -37,15 +40,13 @@ export default function Room({ userName: propUserName }) {
     chat: []
   });
   const { gold, color, position } = roomData;
-  // Create an alias for clarity.
-  const playerColor = color;
-
-  // Local state for the player's position and other UI data.
+  const playerColor = color; // For consistency.
+  
+  // Local UI and position state.
   const [playerPos, setPlayerPos] = useState(position);
   const [chatMessages, setChatMessages] = useState([]);
   const [players, setPlayers] = useState([]);
   const [showSettings, setShowSettings] = useState(false);
-  // Initialize the slider (playerColorHue) with 0 by default; we update it when data is fetched.
   const [playerColorHue, setPlayerColorHue] = useState(0);
   const [chatInput, setChatInput] = useState("");
   const [chatCollapsed, setChatCollapsed] = useState(false);
@@ -62,16 +63,16 @@ export default function Room({ userName: propUserName }) {
   const [barOccupancy, setBarOccupancy] = useState(0);
   const [currentSeat, setCurrentSeat] = useState(null);
 
-  // Refs for key handling, DOM elements, and the WebSocket instance.
+  // Refs.
   const heldKeys = useRef([]);
   const containerRef = useRef(null);
   const roomRef = useRef(null);
   const chatInputRef = useRef(null);
   const wsRef = useRef(null);
+  const debounceTimeout = useRef(null);
+  const speed = 6;
 
-  const speed = 6; // Movement speed
-
-  // Predefined room layout constants.
+  // Predefined layout.
   const tableCenters = {
     table1: { x: 512.5, y: 672.5 },
     table2: { x: 1112.5, y: 672.5 },
@@ -93,20 +94,14 @@ export default function Room({ userName: propUserName }) {
     return { x, y };
   });
 
-  // --- Logout on Exit Button ---
-  const handleExit = () => {
-    fetch('/api/auth/logout', {
-      method: 'DELETE',
-      credentials: 'include'
-    })
-      .then(() => {
-        navigate('/');
-      })
-      .catch(err => {
-        console.error('Logout error:', err);
-        navigate('/');
-      });
-  };
+  // --- Logout on Page Hide ---
+  useEffect(() => {
+    const handlePageHide = () => {
+      navigator.sendBeacon('/api/auth/logout');
+    };
+    window.addEventListener("pagehide", handlePageHide);
+    return () => window.removeEventListener("pagehide", handlePageHide);
+  }, []);
 
   // --- Initial Data Fetch for Persistence ---
   useEffect(() => {
@@ -116,21 +111,52 @@ export default function Room({ userName: propUserName }) {
         console.log("Fetched persisted room data:", data);
         setRoomData(data);
         setPlayerPos(data.position || { x: 750, y: 500 });
-        // Also update the slider's hue to match the persisted color.
         setPlayerColorHue(extractHue(data.color));
+        setUsername(data.email || propUserName || "Player");
+        setLoaded(true);
       })
       .catch(err => console.error("Failed to fetch room data:", err));
+  }, [propUserName]);
+
+  // --- Persist Chat History on Mount ---
+  useEffect(() => {
+    fetch('/api/chat', { credentials: 'include' })
+      .then(res => res.json())
+      .then(chats => {
+        console.log("Fetched chat history:", chats);
+        setChatMessages(chats);
+      })
+      .catch(err => console.error("Failed to fetch chat messages:", err));
   }, []);
 
-  // --- WebSocket Helper Function ---
+  // --- WebSocket Helper ---
   const sendRoomEvent = (type, payload) => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      const event = { from: loginName, type, payload };
+      const event = { from: username, type, payload };
       wsRef.current.send(JSON.stringify(event));
     }
   };
 
-  // --- Establish the WebSocket Connection ---
+  // --- Debounce for Immediate Movement Save ---
+  useEffect(() => {
+    if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
+    debounceTimeout.current = setTimeout(() => {
+      fetch('/api/user/data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ position: playerPos })
+      })
+        .then(res => res.json())
+        .then(data => {
+          console.log("Immediate DB update for position:", data.position);
+        })
+        .catch(err => console.error("Immediate update failed", err));
+    }, 500);
+    return () => clearTimeout(debounceTimeout.current);
+  }, [playerPos]);
+
+  // --- Establish WebSocket Connection ---
   useEffect(() => {
     const ws = new WebSocket('ws://localhost:4000');
     ws.onopen = () => {
@@ -138,52 +164,70 @@ export default function Room({ userName: propUserName }) {
       sendRoomEvent(RoomEvent.Init, {});
     };
     ws.onmessage = (event) => {
-      try {
-        const message = JSON.parse(event.data);
-        console.log('Received WS message:', message);
-        switch (message.type) {
-          case RoomEvent.Init:
-            if (message.payload) {
-              setRoomData(message.payload.roomData || {});
-              setPlayers(message.payload.players || []);
-              setChatMessages(message.payload.chatMessages || []);
-              if (message.payload.roomData?.position) {
-                setPlayerPos(message.payload.roomData.position);
-              }
-            }
-            break;
-          case RoomEvent.Chat:
-            setChatMessages(prev => [...prev, message]);
-            break;
-          case RoomEvent.Move:
-            setPlayers(prev => {
-              const filtered = prev.filter(p => p.email !== message.from);
-              return [...filtered, { email: message.from, position: message.payload, color: message.color || "hsl(0, 100%, 50%)" }];
-            });
-            break;
-          case RoomEvent.ColorChange:
-            setPlayers(prev =>
-              prev.map(p => p.email === message.from ? { ...p, color: message.payload } : p)
-            );
-            break;
-          case RoomEvent.GoldUpdate:
-            setRoomData(prev => ({ ...prev, gold: message.payload }));
-            break;
-          case RoomEvent.BuyDrink:
-            // Optionally process drink events.
-            break;
-          default:
-            console.warn('Unhandled WS message type:', message.type);
+      if (event.data instanceof Blob) {
+        event.data.text().then((text) => {
+          try {
+            const message = JSON.parse(text);
+            handleWSMessage(message);
+          } catch (err) {
+            console.error('Error parsing WS message from Blob:', err);
+          }
+        }).catch(err => {
+          console.error('Error converting Blob to text:', err);
+        });
+      } else {
+        try {
+          const message = JSON.parse(event.data);
+          handleWSMessage(message);
+        } catch (err) {
+          console.error('Error processing WS message:', err);
         }
-      } catch (err) {
-        console.error('Error processing WS message:', err);
       }
     };
+    
+    function handleWSMessage(message) {
+      console.log('Received WS message:', message);
+      switch (message.type) {
+        case RoomEvent.Init:
+          if (message.payload) {
+            setRoomData(message.payload.roomData || {});
+            setPlayers(message.payload.players || []);
+            setChatMessages(message.payload.chatMessages || []);
+            if (message.payload.roomData?.position) {
+              setPlayerPos(message.payload.roomData.position);
+            }
+          }
+          break;
+        case RoomEvent.Chat:
+          setChatMessages(prev => [...prev, message]);
+          break;
+        case RoomEvent.Move:
+          setPlayers(prev => {
+            const filtered = prev.filter(p => p.email !== message.from);
+            return [...filtered, { email: message.from, position: message.payload, color: message.color || "hsl(0, 100%, 50%)" }];
+          });
+          break;
+        case RoomEvent.ColorChange:
+          setPlayers(prev =>
+            prev.map(p => p.email === message.from ? { ...p, color: message.payload } : p)
+          );
+          break;
+        case RoomEvent.GoldUpdate:
+          setRoomData(prev => ({ ...prev, gold: message.payload }));
+          break;
+        case RoomEvent.BuyDrink:
+          // Process BuyDrink event if desired.
+          break;
+        default:
+          console.warn('Unhandled WS message type:', message.type);
+      }
+    }
+    
     ws.onerror = (err) => console.error('WebSocket error:', err);
     ws.onclose = () => console.log('WebSocket closed');
     wsRef.current = ws;
     return () => ws.close();
-  }, [loginName]);
+  }, [username]);
 
   // --- Dual Update: Color Change ---
   useEffect(() => {
@@ -203,7 +247,7 @@ export default function Room({ userName: propUserName }) {
         })
         .catch(err => console.error("Failed to update color in DB", err));
     }
-  }, [playerColorHue, roomData.color, loginName]);
+  }, [playerColorHue, roomData.color, username]);
 
   // --- Dual Update: Persist Movement Every 2 Seconds ---
   useEffect(() => {
@@ -221,9 +265,9 @@ export default function Room({ userName: propUserName }) {
         .catch(err => console.error("Failed to update position in DB", err));
     }, 2000);
     return () => clearInterval(intervalId);
-  }, [playerPos, loginName]);
+  }, [playerPos, username]);
 
-  // --- Movement: Continuously update player position and broadcast via WS ---
+  // --- Movement: Continuously update position and broadcast via WS ---
   useEffect(() => {
     let frameId;
     const update = () => {
@@ -245,7 +289,7 @@ export default function Room({ userName: propUserName }) {
     };
     frameId = requestAnimationFrame(update);
     return () => cancelAnimationFrame(frameId);
-  }, [loginName]);
+  }, [username]);
 
   // --- Camera Panning Logic ---
   useEffect(() => {
@@ -334,7 +378,6 @@ export default function Room({ userName: propUserName }) {
     }
   };
 
-  // --- Handle Buying a Drink: Dual Update for Gold ---
   const handleBuyDrink = () => {
     if (gold >= 5) {
       fetch('/api/user/data', {
@@ -362,41 +405,32 @@ export default function Room({ userName: propUserName }) {
     }
   };
 
-  // --- Handle Sending a Chat Message: Dual Update ---
   const handleChatSubmit = (e) => {
     e.preventDefault();
     const trimmedMessage = chatInput.trim();
     if (trimmedMessage !== "") {
-      sendRoomEvent(RoomEvent.Chat, {
-        text: trimmedMessage,
-        color: playerColor
-      });
+      const messageObject = {
+        from: username,
+        type: RoomEvent.Chat,
+        payload: { text: trimmedMessage, color: playerColor },
+        timestamp: new Date().toISOString()
+      };
+      // Immediately update local chat state.
+      setChatMessages(prev => [...prev, messageObject]);
+      sendRoomEvent(RoomEvent.Chat, messageObject.payload);
       fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ from: loginName, text: trimmedMessage, color: playerColor })
+        body: JSON.stringify({ from: username, text: trimmedMessage, color: playerColor })
       })
         .then(res => res.json())
-        .then(data => {
-          console.log("Chat message persisted:", data);
-        })
+        .then(data => console.log("Chat message persisted:", data))
         .catch(err => console.error("Failed to persist chat message", err));
       
       setChatInput("");
-      const id = Date.now();
-      const popup = { id, text: trimmedMessage, pos: { x: playerPos.x, y: playerPos.y - 20 } };
-      setChatPopups(prev => [...prev, popup]);
-      setTimeout(() => {
-        setChatPopups(prev => prev.filter(p => p.id !== id));
-      }, 5000);
-      
-      if (chatInputRef.current) {
-        chatInputRef.current.blur();
-      }
     }
   };
 
-  // --- Render the UI ---
   return (
     <main>
       <header>
@@ -404,7 +438,14 @@ export default function Room({ userName: propUserName }) {
         <button
           id="home-button"
           onClick={handleExit}
-          style={{ background: "none", border: "none", color: "inherit", fontSize:"inherit", cursor:"pointer" }}
+          style={{
+            background: "none",
+            border: "none",
+            color: "white",
+            fontSize: "1.5em",
+            cursor: "pointer",
+            padding: "8px"
+          }}
         >
           EXIT
         </button>
@@ -509,7 +550,7 @@ export default function Room({ userName: propUserName }) {
             </div>
           ))}
           <div id="wall-back"></div>
-          <div id="username-display">{loginName}</div>
+          <div id="username-display">{username}</div>
           <div id="bar" onClick={sitAtBar}>Bar area</div>
           <div id="bar-lower">
             {barChairPositions.map((pos, idx) => (
@@ -551,11 +592,9 @@ export default function Room({ userName: propUserName }) {
             })
           )}
           <Bartender onBuyDrink={handleBuyDrink} />
-          {/* Render current user */}
-          <Player position={playerPos} loginName={loginName} color={playerColor} />
-          {/* Render other players */}
+          <Player position={playerPos} loginName={username} color={playerColor} />
           {players.map(p => {
-            if (p.email === loginName) return null;
+            if (p.email === username) return null;
             return (
               <Player
                 key={p.email}
@@ -575,10 +614,10 @@ export default function Room({ userName: propUserName }) {
           <div id="chat-messages" style={{ flex: 1, overflowY: "auto", marginBottom: "0.5em" }}>
             {chatMessages.map((msg, idx) => (
               <div key={idx}>
-                <strong style={{ color: msg.from === loginName ? playerColor : (msg.color || "white") }}>
+                <strong style={{ color: msg.from === username ? playerColor : (msg.color || "white") }}>
                   {msg.from}:
                 </strong>{" "}
-                <span style={{ color: "white" }}>{msg.payload?.text || msg.text}</span>
+                <span style={{ color:"white" }}>{msg.payload?.text || msg.text}</span>
               </div>
             ))}
           </div>

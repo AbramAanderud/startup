@@ -135,8 +135,8 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
-- [ ] **Backend listens for WebSocket connection** - I did not complete this part of the deliverable.
-- [ ] **Frontend makes WebSocket connection** - I did not complete this part of the deliverable.
-- [ ] **Data sent over WebSocket connection** - I did not complete this part of the deliverable.
-- [ ] **WebSocket data displayed** - I did not complete this part of the deliverable.
-- [ ] **Application is fully functional** - I did not complete this part of the deliverable.
+- [x] **Backend listens for WebSocket connection** - Back end is listening for webscocket correctly and succesfully connects in the peerProxy.js. Creates a new instance of WebSocketServer that attatches to that HTTP server and listens. 
+- [x] **Frontend makes WebSocket connection** - In my Room I use a useEffect that creates a new WebSocket('ws://localhost:4000') and then send an initial init to request persisted state. 
+- [x] **Data sent over WebSocket connection** - I send quite a bit of data, sendRoomEvent in my room sends all changes so when the user changes color, moves, sends messages, buys a drink, all of these are sent with websockets and updated in the  database.
+- [x] **WebSocket data displayed** - When a message is sent in the room the state is updated with the new chat messages to the state array which is update and everyone can see, the gold count is also updated with websockets when a drink is bought. 
+- [x] **Application is fully functional** - Yes! You can create an account and log in and out while all your data is stored and persisted in the data base. Websocket connections are sent an recieved, real time movements are updated, processed, and rendered. You can log out using the exit button or logging out initially and you are logged out on window close. 
