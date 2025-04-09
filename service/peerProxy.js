@@ -2,16 +2,14 @@
 const { WebSocketServer } = require('ws');
 
 function peerProxy(httpServer) {
-  // Create a WebSocket server attached to your HTTP server
+  // Create a WebSocket server attached to the HTTP server.
   const socketServer = new WebSocketServer({ server: httpServer });
 
   socketServer.on('connection', (socket) => {
     socket.isAlive = true;
 
-    // When a message is received from a client, broadcast it to everyone except the sender.
+    // When a message arrives, broadcast it (except back to the sender).
     socket.on('message', (data) => {
-      // You can choose to parse the JSON here if needed:
-      // const message = JSON.parse(data.toString());
       socketServer.clients.forEach((client) => {
         if (client !== socket && client.readyState === client.OPEN) {
           client.send(data);
@@ -19,13 +17,13 @@ function peerProxy(httpServer) {
       });
     });
 
-    // Update connection status on pong
+    // Mark socket as alive upon receiving pong.
     socket.on('pong', () => {
       socket.isAlive = true;
     });
   });
 
-  // Periodically check that clients are still alive
+  // Periodic ping to check health of clients.
   const interval = setInterval(() => {
     socketServer.clients.forEach((client) => {
       if (client.isAlive === false) return client.terminate();
