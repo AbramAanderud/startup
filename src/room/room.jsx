@@ -299,18 +299,34 @@ export function Room({ userName: propUserName }) {
   // --- Handle sending a chat message via WS ---
   const handleChatSubmit = (e) => {
     e.preventDefault();
-    if (chatInput.trim() !== "") {
-      sendRoomEvent(RoomEvent.Chat, { text: chatInput.trim() });
+    const trimmedMessage = chatInput.trim();
+    if (trimmedMessage !== "") {
+      // Send chat event with text and player's color
+      sendRoomEvent(RoomEvent.Chat, {
+        text: trimmedMessage,
+        color: playerColor // assuming playerColor is defined as an alias to roomData.color
+      });
       setChatInput("");
+      
+      // Optionally show a local popup for feedback
       const id = Date.now();
-      const popup = { id, text: chatInput.trim(), pos: { x: playerPos.x, y: playerPos.y - 20 } };
+      const popup = {
+        id,
+        text: trimmedMessage,
+        pos: { x: playerPos.x, y: playerPos.y - 20 }
+      };
       setChatPopups(prev => [...prev, popup]);
       setTimeout(() => {
         setChatPopups(prev => prev.filter(p => p.id !== id));
       }, 5000);
-      chatInputRef.current && chatInputRef.current.blur();
+      
+      // Optionally remove focus from the input
+      if (chatInputRef.current) {
+        chatInputRef.current.blur();
+      }
     }
   };
+  
 
   // --- Render the UI ---
   return (
