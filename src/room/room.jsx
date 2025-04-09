@@ -37,6 +37,8 @@ export function Room({ userName: propUserName }) {
   // Chat messages and other players’ data.
   const [chatMessages, setChatMessages] = useState([]);
   const [players, setPlayers] = useState([]);
+  const [showSettings, setShowSettings] = useState(false);
+
 
   // Local UI states.
   const [playerColorHue, setPlayerColorHue] = useState(0);
@@ -505,14 +507,13 @@ export function Room({ userName: propUserName }) {
           <div id="chat-messages" style={{ flex: 1, overflowY: "auto", marginBottom: "0.5em" }}>
             {chatMessages.map((msg, idx) => (
               <div key={idx}>
-                {msg.from === loginName ? (
-                  <strong style={{ color: playerColor }}>{msg.from}:</strong>
-                ) : (
-                  <strong>{msg.from}:</strong>
-                )}{" "}
-                <span style={{ color: "white" }}>{msg.payload?.text || msg.text}</span>
+                <strong style={{ color: msg.from === loginName ? playerColor : (msg.color || "white") }}>
+                  {msg.from}:
+                </strong>{" "}
+                <span style={{ color:"white" }}>{msg.payload?.text || msg.text}</span>
               </div>
             ))}
+ 
           </div>
         )}
         <form id="chat-form" onSubmit={handleChatSubmit} style={{ display: "flex" }}>
