@@ -1,3 +1,4 @@
+// index.js
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const bcrypt = require('bcryptjs');
@@ -5,6 +6,7 @@ const uuid = require('uuid');
 const axios = require('axios');
 const path = require('path');
 const DB = require('./database');
+const { peerProxy } = require('./peerProxy'); // New: import the WebSocket module
 
 const app = express();
 const port = process.argv[2] || 4000;
@@ -20,16 +22,20 @@ app.use(express.static('public'));
 const apiRouter = express.Router();
 app.use('/api', apiRouter);
 
+// Helper for setting the auth cookie.
 function setAuthCookie(res, token) {
   res.cookie(authCookieName, token, { secure: true, httpOnly: true, sameSite: 'strict' });
 }
 
+// Middleware to verify that the user is logged in.
 async function verifyAuth(req, res, next) {
   const user = await DB.getUserByToken(req.cookies[authCookieName]);
   if (user) next();
   else res.status(401).send({ msg: 'Unauthorized' });
 }
 
+// -------------------
+// Authentication Endpoints
 apiRouter.post('/auth/create', async (req, res) => {
   if (await DB.getUser(req.body.email)) {
     res.status(409).send({ msg: 'Existing user' });
@@ -73,6 +79,8 @@ apiRouter.delete('/auth/logout', async (req, res) => {
   res.status(204).end();
 });
 
+// -------------------
+// User Data Endpoints
 apiRouter.get('/user/data', verifyAuth, async (req, res) => {
   const user = await DB.getUserByToken(req.cookies[authCookieName]);
   const data = await DB.getUserData(user.email);
@@ -87,13 +95,14 @@ apiRouter.post('/user/data', verifyAuth, async (req, res) => {
   res.send(merged);
 });
 
+// -------------------
+// Room & Chat Endpoints
 apiRouter.get('/room/players', async (req, res) => {
   const all = await DB.getAllUserData();
   res.send(all);
 });
 
 let globalChat = [];
-
 apiRouter.get('/chat', (req, res) => {
   res.send(globalChat);
 });
@@ -103,6 +112,8 @@ apiRouter.post('/chat', (req, res) => {
   res.send(req.body);
 });
 
+// -------------------
+// Weather Updates (simulate system events)
 async function fetchWeatherForecast() {
   try {
     const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${weatherApiKey}&units=metric`;
@@ -123,14 +134,21 @@ setInterval(async () => {
   if (forecast) globalChat.push({ from: weatherManUsername, text: forecast });
 }, 180000);
 
+// Global error handler.
 app.use((err, req, res, next) => {
   res.status(500).send({ type: err.name, message: err.message });
 });
 
+// Serve index.html for any unknown routes.
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.listen(port, '0.0.0.0', () => {
+// -------------------
+// Start HTTP Server and Attach WebSocket Server
+const httpServer = app.listen(port, '0.0.0.0', () => {
   console.log(`Listening on port ${port}`);
 });
+
+// Attach the WebSocket server to the same HTTP server.
+peerProxy(httpServer);
