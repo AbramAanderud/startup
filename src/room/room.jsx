@@ -18,11 +18,11 @@ export const RoomEvent = {
   BuyDrink: 'buyDrink'
 };
 
-export function Room({ userName: propUserName }) {
+export default function Room({ userName: propUserName }) {
   const loginName = propUserName || "Player";
   console.log("Room component rendering for:", loginName);
 
-  // Room data state – these values will be updated via WS events.
+  // Persisted room data from the DB. (Defaults in case fetch fails.)
   const [roomData, setRoomData] = useState({
     gold: 0,
     color: 'hsl(0, 100%, 50%)',
@@ -30,17 +30,14 @@ export function Room({ userName: propUserName }) {
     chat: []
   });
   const { gold, color, position } = roomData;
+  // Create an alias to use consistently for player color.
+  const playerColor = color;
 
-  // Local player position state.
+  // Local state for the player's position and other UI aspects.
   const [playerPos, setPlayerPos] = useState(position);
-
-  // Chat messages and other players’ data.
   const [chatMessages, setChatMessages] = useState([]);
   const [players, setPlayers] = useState([]);
   const [showSettings, setShowSettings] = useState(false);
-
-
-  // Local UI states.
   const [playerColorHue, setPlayerColorHue] = useState(0);
   const [chatInput, setChatInput] = useState("");
   const [chatCollapsed, setChatCollapsed] = useState(false);
@@ -88,6 +85,19 @@ export function Room({ userName: propUserName }) {
     return { x, y };
   });
 
+  // --- Initial Fetch for Persistence ---
+  useEffect(() => {
+    // Fetch persisted user data from the backend.
+    fetch('/api/user/data')
+      .then(res => res.json())
+      .then(data => {
+        console.log("Fetched persisted room data:", data);
+        setRoomData(data);
+        setPlayerPos(data.position || { x: 750, y: 500 });
+      })
+      .catch(err => console.error("Failed to fetch room data:", err));
+  }, []);
+
   // --- WebSocket Helper Function ---
   const sendRoomEvent = (type, payload) => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
@@ -101,7 +111,7 @@ export function Room({ userName: propUserName }) {
     const ws = new WebSocket('ws://localhost:4000');
     ws.onopen = () => {
       console.log('WebSocket connected');
-      // Send an initialization event to request initial state.
+      // Request initial state from the server.
       sendRoomEvent(RoomEvent.Init, {});
     };
     ws.onmessage = (event) => {
@@ -110,13 +120,11 @@ export function Room({ userName: propUserName }) {
         console.log('Received WS message:', message);
         switch (message.type) {
           case RoomEvent.Init:
-            // Assuming the server sends initial state in message.payload:
-            // { roomData: {...}, players: [...], chatMessages: [...] }
+            // Expecting payload: { roomData, players, chatMessages }
             if (message.payload) {
               setRoomData(message.payload.roomData || {});
               setPlayers(message.payload.players || []);
               setChatMessages(message.payload.chatMessages || []);
-              // Also update playerPos if provided.
               if (message.payload.roomData?.position) {
                 setPlayerPos(message.payload.roomData.position);
               }
@@ -126,7 +134,7 @@ export function Room({ userName: propUserName }) {
             setChatMessages(prev => [...prev, message]);
             break;
           case RoomEvent.Move:
-            // Update the data for a particular player.
+            // Update or add the moving player's info.
             setPlayers(prev => {
               const filtered = prev.filter(p => p.email !== message.from);
               return [...filtered, { email: message.from, position: message.payload, color: message.color || "hsl(0, 100%, 50%)" }];
@@ -141,7 +149,7 @@ export function Room({ userName: propUserName }) {
             setRoomData(prev => ({ ...prev, gold: message.payload }));
             break;
           case RoomEvent.BuyDrink:
-            // For buy drink events, let the server send a gold update.
+            // Optionally, process buy drink events here.
             break;
           default:
             console.warn('Unhandled WS message type:', message.type);
@@ -152,19 +160,47 @@ export function Room({ userName: propUserName }) {
     };
     ws.onerror = (err) => console.error('WebSocket error:', err);
     ws.onclose = () => console.log('WebSocket closed');
-
     wsRef.current = ws;
     return () => ws.close();
   }, [loginName]);
 
-  // --- Handle color changes by sending a WS event ---
+  // --- Dual Update: Color Change ---
   useEffect(() => {
     const newColor = `hsl(${playerColorHue}, 100%, 50%)`;
     if (newColor !== roomData.color) {
+      // Send WS event.
       sendRoomEvent(RoomEvent.ColorChange, newColor);
-      setRoomData(prev => ({ ...prev, color: newColor }));
+      // Also update the DB.
+      fetch('/api/user/data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ color: newColor })
+      })
+        .then(res => res.json())
+        .then(data => {
+          console.log("DB updated with new color:", data.color);
+          setRoomData(prev => ({ ...prev, color: data.color }));
+        })
+        .catch(err => console.error("Failed to update color in DB", err));
     }
   }, [playerColorHue, roomData.color, loginName]);
+
+  // --- Dual Update: Persist Movement Every 2 Seconds ---
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      fetch('/api/user/data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ position: playerPos })
+      })
+        .then(res => res.json())
+        .then(data => {
+          console.log("DB updated with new position:", data.position);
+        })
+        .catch(err => console.error("Failed to update position in DB", err));
+    }, 2000);
+    return () => clearInterval(intervalId);
+  }, [playerPos, loginName]);
 
   // --- Movement: Continuously update player position and broadcast via WS ---
   useEffect(() => {
@@ -177,10 +213,8 @@ export function Room({ userName: propUserName }) {
         if (key === "ArrowDown") newPos.y += speed;
         if (key === "ArrowLeft") newPos.x -= speed;
         if (key === "ArrowRight") newPos.x += speed;
-        // Enforce room boundaries.
         newPos.x = Math.max(0, Math.min(newPos.x, 1500 - 40));
         newPos.y = Math.max(0, Math.min(newPos.y, 1200 - 40));
-        // Broadcast new position if it changed.
         if (newPos.x !== prev.x || newPos.y !== prev.y) {
           sendRoomEvent(RoomEvent.Move, newPos);
         }
@@ -192,7 +226,7 @@ export function Room({ userName: propUserName }) {
     return () => cancelAnimationFrame(frameId);
   }, [loginName]);
 
-  // --- Camera panning logic: Adjust the room's translation based on player position ---
+  // --- Camera Panning Logic ---
   useEffect(() => {
     if (containerRef.current && roomRef.current) {
       const cw = containerRef.current.clientWidth;
@@ -207,7 +241,7 @@ export function Room({ userName: propUserName }) {
     }
   }, [playerPos]);
 
-  // --- Key handling: Listen for arrow key events ---
+  // --- Key Handling ---
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
@@ -229,7 +263,7 @@ export function Room({ userName: propUserName }) {
     };
   }, []);
 
-  // --- Seating logic ---
+  // --- Seating Logic ---
   const sitAtTable = (tableId) => {
     if (currentSeat && currentSeat.type === "table" && currentSeat.id === tableId) return;
     if (tableOccupancy[tableId] < 4) {
@@ -249,7 +283,7 @@ export function Room({ userName: propUserName }) {
       setTableOccupancy(prev => ({ ...prev, [tableId]: prev[tableId] + 1 }));
       setCurrentSeat({ type: "table", id: tableId, seatIndex });
       setPlayerPos(newPos);
-      // The movement effect will broadcast the new position via WS.
+      // The movement effect will broadcast the new position.
     } else {
       alert("This table is full!");
     }
@@ -280,11 +314,22 @@ export function Room({ userName: propUserName }) {
     }
   };
 
-  // --- Handle buying a drink: Deduct gold and notify via WS ---
+  // --- Handle Buying a Drink: Dual Update ---
   const handleBuyDrink = () => {
     if (gold >= 5) {
-      sendRoomEvent(RoomEvent.BuyDrink, {}); // Server should process this and broadcast a GoldUpdate.
-      // Show local popup for feedback.
+      sendRoomEvent(RoomEvent.BuyDrink, {});
+      fetch('/api/user/data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ gold: gold - 5 })
+      })
+        .then(res => res.json())
+        .then(data => {
+          console.log("DB updated with new gold:", data.gold);
+          setRoomData(prev => ({ ...prev, gold: data.gold }));
+        })
+        .catch(err => console.error("Failed to update gold in DB", err));
+      
       const id = Date.now();
       const popup = { id, text: "Bought drink for $5", pos: { x: playerPos.x, y: playerPos.y - 10 } };
       setDrinkPopups(prev => [...prev, popup]);
@@ -296,37 +341,41 @@ export function Room({ userName: propUserName }) {
     }
   };
 
-  // --- Handle sending a chat message via WS ---
+  // --- Handle Sending a Chat Message: Dual Update ---
   const handleChatSubmit = (e) => {
     e.preventDefault();
     const trimmedMessage = chatInput.trim();
     if (trimmedMessage !== "") {
-      // Send chat event with text and player's color
+      // Send WS event.
       sendRoomEvent(RoomEvent.Chat, {
         text: trimmedMessage,
-        color: playerColor // assuming playerColor is defined as an alias to roomData.color
+        color: playerColor
       });
-      setChatInput("");
+      // Persist chat via HTTP.
+      fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ from: loginName, text: trimmedMessage, color: playerColor })
+      })
+        .then(res => res.json())
+        .then(data => {
+          console.log("Chat message persisted:", data);
+        })
+        .catch(err => console.error("Failed to persist chat message", err));
       
-      // Optionally show a local popup for feedback
+      setChatInput("");
       const id = Date.now();
-      const popup = {
-        id,
-        text: trimmedMessage,
-        pos: { x: playerPos.x, y: playerPos.y - 20 }
-      };
+      const popup = { id, text: trimmedMessage, pos: { x: playerPos.x, y: playerPos.y - 20 } };
       setChatPopups(prev => [...prev, popup]);
       setTimeout(() => {
         setChatPopups(prev => prev.filter(p => p.id !== id));
       }, 5000);
       
-      // Optionally remove focus from the input
       if (chatInputRef.current) {
         chatInputRef.current.blur();
       }
     }
   };
-  
 
   // --- Render the UI ---
   return (
@@ -338,11 +387,7 @@ export function Room({ userName: propUserName }) {
           <img src="/images/final coin.png" alt="Coin" className="gold-icon" />
           <span>: {(gold || 0).toLocaleString()}</span>
         </div>
-        <div
-          id="settings-button"
-          onClick={() => setShowSettings(true)}
-          style={{ cursor: "pointer" }}
-        ></div>
+        <div id="settings-button" onClick={() => setShowSettings(true)} style={{ cursor: "pointer" }}></div>
       </header>
       {showSettings && (
         <div
@@ -449,28 +494,16 @@ export function Room({ userName: propUserName }) {
           <div className="picture-frame" id="frame-2">
             <img src="/images/michalagnelo.jpg" alt="Picture 2" />
           </div>
-          <div
-            onClick={() => sitAtTable("table1")}
-            style={{ position: "absolute", left: "400px", top: "560px", cursor: "pointer" }}
-          >
+          <div onClick={() => sitAtTable("table1")} style={{ position: "absolute", left: "400px", top: "560px", cursor: "pointer" }}>
             <Table id="table1" occupancy={tableOccupancy.table1} maxOccupancy={4} />
           </div>
-          <div
-            onClick={() => sitAtTable("table2")}
-            style={{ position: "absolute", left: "1000px", top: "560px", cursor: "pointer" }}
-          >
+          <div onClick={() => sitAtTable("table2")} style={{ position: "absolute", left: "1000px", top: "560px", cursor: "pointer" }}>
             <Table id="table2" occupancy={tableOccupancy.table2} maxOccupancy={4} />
           </div>
-          <div
-            onClick={() => sitAtTable("table3")}
-            style={{ position: "absolute", left: "400px", top: "900px", cursor: "pointer" }}
-          >
+          <div onClick={() => sitAtTable("table3")} style={{ position: "absolute", left: "400px", top: "900px", cursor: "pointer" }}>
             <Table id="table3" occupancy={tableOccupancy.table3} maxOccupancy={4} />
           </div>
-          <div
-            onClick={() => sitAtTable("table4")}
-            style={{ position: "absolute", left: "1000px", top: "900px", cursor: "pointer" }}
-          >
+          <div onClick={() => sitAtTable("table4")} style={{ position: "absolute", left: "1000px", top: "900px", cursor: "pointer" }}>
             <Table id="table4" occupancy={tableOccupancy.table4} maxOccupancy={4} />
           </div>
           {Object.entries(tableCenters).map(([tableId, center]) =>
@@ -506,16 +539,7 @@ export function Room({ userName: propUserName }) {
           })}
         </div>
       </div>
-      <div
-        id="chat-box"
-        style={{
-          height: chatCollapsed ? "50px" : "30%",
-          minHeight: chatCollapsed ? "50px" : "200px",
-          transition: "height 0.3s ease",
-          display: "flex",
-          flexDirection: "column"
-        }}
-      >
+      <div id="chat-box" style={{ height: chatCollapsed ? "50px" : "30%", minHeight: chatCollapsed ? "50px" : "200px", transition: "height 0.3s ease", display: "flex", flexDirection: "column" }}>
         <button onClick={() => setChatCollapsed(!chatCollapsed)} style={{ marginBottom: "0.5em", cursor: "pointer" }}>
           {chatCollapsed ? "Show Chat" : "Hide Chat"}
         </button>
@@ -526,10 +550,9 @@ export function Room({ userName: propUserName }) {
                 <strong style={{ color: msg.from === loginName ? playerColor : (msg.color || "white") }}>
                   {msg.from}:
                 </strong>{" "}
-                <span style={{ color:"white" }}>{msg.payload?.text || msg.text}</span>
+                <span style={{ color: "white" }}>{msg.payload?.text || msg.text}</span>
               </div>
             ))}
- 
           </div>
         )}
         <form id="chat-form" onSubmit={handleChatSubmit} style={{ display: "flex" }}>
@@ -547,5 +570,3 @@ export function Room({ userName: propUserName }) {
     </main>
   );
 }
-
-export default Room;
