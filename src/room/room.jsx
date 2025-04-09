@@ -1,6 +1,6 @@
 // Room.jsx
 import React, { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Player from './player';
 import Chair from './chair';
 import Table from './table';
@@ -18,11 +18,18 @@ export const RoomEvent = {
   BuyDrink: 'buyDrink'
 };
 
+// Helper to extract the hue value from an HSL string, e.g. "hsl(120, 100%, 50%)"
+function extractHue(hslString) {
+  const match = hslString.match(/hsl\(\s*([\d.]+),/);
+  return match ? Number(match[1]) : 0;
+}
+
 export default function Room({ userName: propUserName }) {
   const loginName = propUserName || "Player";
+  const navigate = useNavigate();
   console.log("Room component rendering for:", loginName);
 
-  // Persisted room data from the DB. (Defaults in case fetch fails.)
+  // Persisted room data from the DB (with default values as fallback).
   const [roomData, setRoomData] = useState({
     gold: 0,
     color: 'hsl(0, 100%, 50%)',
@@ -30,14 +37,15 @@ export default function Room({ userName: propUserName }) {
     chat: []
   });
   const { gold, color, position } = roomData;
-  // Create an alias to use consistently for player color.
+  // Create an alias for clarity.
   const playerColor = color;
 
-  // Local state for the player's position and other UI aspects.
+  // Local state for the player's position and other UI data.
   const [playerPos, setPlayerPos] = useState(position);
   const [chatMessages, setChatMessages] = useState([]);
   const [players, setPlayers] = useState([]);
   const [showSettings, setShowSettings] = useState(false);
+  // Initialize the slider (playerColorHue) with 0 by default; we update it when data is fetched.
   const [playerColorHue, setPlayerColorHue] = useState(0);
   const [chatInput, setChatInput] = useState("");
   const [chatCollapsed, setChatCollapsed] = useState(false);
@@ -54,7 +62,7 @@ export default function Room({ userName: propUserName }) {
   const [barOccupancy, setBarOccupancy] = useState(0);
   const [currentSeat, setCurrentSeat] = useState(null);
 
-  // Refs for key handling, container elements, and the WebSocket instance.
+  // Refs for key handling, DOM elements, and the WebSocket instance.
   const heldKeys = useRef([]);
   const containerRef = useRef(null);
   const roomRef = useRef(null);
@@ -85,15 +93,31 @@ export default function Room({ userName: propUserName }) {
     return { x, y };
   });
 
-  // --- Initial Fetch for Persistence ---
+  // --- Logout on Exit Button ---
+  const handleExit = () => {
+    fetch('/api/auth/logout', {
+      method: 'DELETE',
+      credentials: 'include'
+    })
+      .then(() => {
+        navigate('/');
+      })
+      .catch(err => {
+        console.error('Logout error:', err);
+        navigate('/');
+      });
+  };
+
+  // --- Initial Data Fetch for Persistence ---
   useEffect(() => {
-    // Fetch persisted user data from the backend.
-    fetch('/api/user/data')
+    fetch('/api/user/data', { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         console.log("Fetched persisted room data:", data);
         setRoomData(data);
         setPlayerPos(data.position || { x: 750, y: 500 });
+        // Also update the slider's hue to match the persisted color.
+        setPlayerColorHue(extractHue(data.color));
       })
       .catch(err => console.error("Failed to fetch room data:", err));
   }, []);
@@ -111,7 +135,6 @@ export default function Room({ userName: propUserName }) {
     const ws = new WebSocket('ws://localhost:4000');
     ws.onopen = () => {
       console.log('WebSocket connected');
-      // Request initial state from the server.
       sendRoomEvent(RoomEvent.Init, {});
     };
     ws.onmessage = (event) => {
@@ -120,7 +143,6 @@ export default function Room({ userName: propUserName }) {
         console.log('Received WS message:', message);
         switch (message.type) {
           case RoomEvent.Init:
-            // Expecting payload: { roomData, players, chatMessages }
             if (message.payload) {
               setRoomData(message.payload.roomData || {});
               setPlayers(message.payload.players || []);
@@ -134,7 +156,6 @@ export default function Room({ userName: propUserName }) {
             setChatMessages(prev => [...prev, message]);
             break;
           case RoomEvent.Move:
-            // Update or add the moving player's info.
             setPlayers(prev => {
               const filtered = prev.filter(p => p.email !== message.from);
               return [...filtered, { email: message.from, position: message.payload, color: message.color || "hsl(0, 100%, 50%)" }];
@@ -149,7 +170,7 @@ export default function Room({ userName: propUserName }) {
             setRoomData(prev => ({ ...prev, gold: message.payload }));
             break;
           case RoomEvent.BuyDrink:
-            // Optionally, process buy drink events here.
+            // Optionally process drink events.
             break;
           default:
             console.warn('Unhandled WS message type:', message.type);
@@ -168,12 +189,11 @@ export default function Room({ userName: propUserName }) {
   useEffect(() => {
     const newColor = `hsl(${playerColorHue}, 100%, 50%)`;
     if (newColor !== roomData.color) {
-      // Send WS event.
       sendRoomEvent(RoomEvent.ColorChange, newColor);
-      // Also update the DB.
       fetch('/api/user/data', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ color: newColor })
       })
         .then(res => res.json())
@@ -191,6 +211,7 @@ export default function Room({ userName: propUserName }) {
       fetch('/api/user/data', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ position: playerPos })
       })
         .then(res => res.json())
@@ -283,7 +304,6 @@ export default function Room({ userName: propUserName }) {
       setTableOccupancy(prev => ({ ...prev, [tableId]: prev[tableId] + 1 }));
       setCurrentSeat({ type: "table", id: tableId, seatIndex });
       setPlayerPos(newPos);
-      // The movement effect will broadcast the new position.
     } else {
       alert("This table is full!");
     }
@@ -314,18 +334,19 @@ export default function Room({ userName: propUserName }) {
     }
   };
 
-  // --- Handle Buying a Drink: Dual Update ---
+  // --- Handle Buying a Drink: Dual Update for Gold ---
   const handleBuyDrink = () => {
     if (gold >= 5) {
-      sendRoomEvent(RoomEvent.BuyDrink, {});
       fetch('/api/user/data', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ gold: gold - 5 })
       })
         .then(res => res.json())
         .then(data => {
           console.log("DB updated with new gold:", data.gold);
+          sendRoomEvent(RoomEvent.GoldUpdate, data.gold);
           setRoomData(prev => ({ ...prev, gold: data.gold }));
         })
         .catch(err => console.error("Failed to update gold in DB", err));
@@ -346,12 +367,10 @@ export default function Room({ userName: propUserName }) {
     e.preventDefault();
     const trimmedMessage = chatInput.trim();
     if (trimmedMessage !== "") {
-      // Send WS event.
       sendRoomEvent(RoomEvent.Chat, {
         text: trimmedMessage,
         color: playerColor
       });
-      // Persist chat via HTTP.
       fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -382,7 +401,13 @@ export default function Room({ userName: propUserName }) {
     <main>
       <header>
         <h1>CHATTER PAD</h1>
-        <Link to="/" id="home-button">EXIT</Link>
+        <button
+          id="home-button"
+          onClick={handleExit}
+          style={{ background: "none", border: "none", color: "inherit", fontSize:"inherit", cursor:"pointer" }}
+        >
+          EXIT
+        </button>
         <div id="gold-count">
           <img src="/images/final coin.png" alt="Coin" className="gold-icon" />
           <span>: {(gold || 0).toLocaleString()}</span>
@@ -417,6 +442,9 @@ export default function Room({ userName: propUserName }) {
             onClick={(e) => e.stopPropagation()}
           >
             <h2>Change Your Color</h2>
+            <p style={{ fontSize: "0.9em", margin: "10px 0", color: "white" }}>
+              Arrow keys to move and click to interact.
+            </p>
             <input
               type="range"
               min="0"

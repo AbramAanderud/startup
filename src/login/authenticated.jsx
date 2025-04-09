@@ -1,6 +1,6 @@
+// authenticated.jsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-
 import Button from 'react-bootstrap/Button';
 import './authenticated.css';
 
@@ -9,10 +9,11 @@ export function Authenticated(props) {
 
   function logout() {
     fetch(`/api/auth/logout`, {
-      method: 'delete',
+      method: 'DELETE',
+      credentials: 'include'  // Ensure cookies are included with this request.
     })
       .catch(() => {
-        // Logout failed. Assuming offline
+        // Logout failed. Assuming offline.
       })
       .finally(() => {
         localStorage.removeItem('userName');
